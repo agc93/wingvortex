@@ -1,0 +1,1 @@
+export {installedFilesRenderer} from './InstalledFiles'

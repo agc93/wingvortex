@@ -15,7 +15,7 @@ export const unreal: UnrealGameHelper = new UnrealGameHelper(GAME_ID);
 
 export type ModList = { [modId: string]: IMod; };
 
-const relModPath = path.join('Game', 'Content', 'Paks', '<#>');
+const relModPath = path.join('ProjectWingman', 'Content', 'Paks', '~mods');
 
 export type RunningTools = {[key: string]: {exePath: string, started: any, pid: number, exclusive: boolean}};
 
@@ -47,9 +47,9 @@ function main(context: IExtensionContext) {
         mergeMods: true,
         logo: 'gameart.png',
         supportedTools: [],
-        executable: () => '<#>.exe',
+        executable: () => 'ProjectWingman.exe',
         requiredFiles: [
-            '<#>.exe'
+            'ProjectWingman.exe'
         ],
         id: GAME_ID,
         queryPath: findGame,
@@ -73,7 +73,7 @@ function main(context: IExtensionContext) {
         (files, destination, gameId, progress) => installContent(context.api, files, destination, gameId, progress)
     );
     context.registerTableAttribute('mods', {
-        id: 'acev-paks',
+        id: 'pw-paks',
         placement: 'detail',
         name: 'Installed files',
         help: 'Which specific files from the mod were installed',

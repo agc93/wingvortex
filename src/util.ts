@@ -34,7 +34,10 @@ export function isGameManaged(api: IExtensionApi): boolean {
     return gameProfiles && gameProfiles.length > 0;
 }
 
-export const UserPaths = {
+// the below is completely untested and may not even be relevant
+// do not use until more testing is completed.
+
+const UserPaths = {
 	userDataPath: (): string => path.join(remote.app.getPath('home'), '<#>'),
 	userConfigPath: (configName?: string): string => getUserConfigPath(configName),
 	saveGamesPath: (saveId?: string): string => getSaveGamePath(saveId),

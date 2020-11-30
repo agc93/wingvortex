@@ -17,8 +17,6 @@ export type ModList = { [modId: string]: IMod; };
 
 const relModPath = path.join('Game', 'Content', 'Paks', '<#>');
 
-export type GroupedPaths = { [key: string]: string[] }
-
 export type RunningTools = {[key: string]: {exePath: string, started: any, pid: number, exclusive: boolean}};
 
 

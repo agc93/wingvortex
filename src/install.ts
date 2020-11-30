@@ -2,10 +2,12 @@ import { IExtensionApi, ProgressDelegate, IInstallResult, IDialogResult, ICheckb
 import path = require("path");
 import { log, util } from "vortex-api";
 import { groupBy } from "./util";
-import { MOD_FILE_EXT, GroupedPaths, unreal } from ".";
+import { MOD_FILE_EXT, unreal } from ".";
 import { InstructionType } from "vortex-api/lib/extensions/mod_management/types/IInstallResult";
 import { getModName } from "vortex-ext-common/util";
 import { Features } from "./settings";
+
+type GroupedPaths = { [key: string]: string[] }
 
 export async function advancedInstall(api: IExtensionApi, files: string[], destinationPath: string, gameId: string, progress: ProgressDelegate): Promise<IInstallResult> {
     //basically need to keep descending until we find a reliable indicator of mod root

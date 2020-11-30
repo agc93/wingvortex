@@ -95,7 +95,7 @@ jobs:
     - name: Run Nexus uploader
       shell: bash
       run: |
-        unex upload 125 ./extension/game-projectwingman.zip -v ${{ steps.vars.outputs.tag }}
+        unex upload 0 ./extension/game-projectwingman.zip -v ${{ steps.vars.outputs.tag }}
       env:
         UNEX_APIKEY: ${{ secrets.NEXUS_TOKEN }}
         UNEX_COOKIES: ${{ secrets.NEXUS_COOKIES }}

@@ -37,7 +37,7 @@ export function isGameManaged(api: IExtensionApi): boolean {
 // the below is completely untested and may not even be relevant
 // do not use until more testing is completed.
 
-const UserPaths = {
+export const UserPaths = {
 	userDataPath: (): string => path.join(remote.app.getPath('home'), 'AppData', 'Local', 'ProjectWingman', 'Saved'),
 	userConfigPath: (configName?: string): string => getUserConfigPath(configName),
 	saveGamesPath: (saveId?: string): string => getSaveGamePath(saveId),

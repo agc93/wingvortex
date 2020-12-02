@@ -1,6 +1,6 @@
 import { fs, log, util } from "vortex-api";
 import { IDiscoveryResult, IExtensionApi, IExtensionContext, IGameStoreEntry, IInstallResult, IMod, ProgressDelegate } from 'vortex-api/lib/types/api';
-import { isGameManaged } from "./util";
+import { isGameManaged, UserPaths } from "./util";
 import { Features, GeneralSettings, settingsReducer } from "./settings";
 import { advancedInstall } from "./install";
 import { installedFilesRenderer } from "./attributes";
@@ -63,7 +63,9 @@ function main(context: IExtensionContext) {
             SteamAPPId: STEAMAPP_ID.toString()
         },
         details: {
-            steamAppId: STEAMAPP_ID
+            steamAppId: STEAMAPP_ID,
+            settingsPath: () => UserPaths.userConfigPath(),
+            appDataPath: () => UserPaths.userDataPath()
         }
     });
     context.registerInstaller(

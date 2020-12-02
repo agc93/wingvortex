@@ -38,25 +38,26 @@ export function isGameManaged(api: IExtensionApi): boolean {
 // do not use until more testing is completed.
 
 const UserPaths = {
-	userDataPath: (): string => path.join(remote.app.getPath('home'), '<#>'),
+	userDataPath: (): string => path.join(remote.app.getPath('home'), 'AppData', 'Local', 'ProjectWingman', 'Saved'),
 	userConfigPath: (configName?: string): string => getUserConfigPath(configName),
 	saveGamesPath: (saveId?: string): string => getSaveGamePath(saveId),
 }
 
 function getUserConfigPath(configName?: string) {
-    return path.join(UserPaths.userDataPath(), 'Config', configName ?? '');
+    return path.join(UserPaths.userDataPath(), 'Config', 'WindowsNoEditor', configName ?? '');
 }
 
-function getSaveGamePath(saveGameId?: string) {
+function getSaveGamePath(saveGameFile?: string) {
 	var saveGameDir = path.join(UserPaths.userDataPath(), 'SaveGames');
-	if (saveGameId) {
-		return path.join(saveGameDir, saveGameId);
+	if (saveGameFile) {
+		return path.join(saveGameDir, saveGameFile);
 	} else {
-		var contents = nfs.readdirSync(saveGameDir, {withFileTypes: true}).filter(de => de.isDirectory);
+		/* var contents = nfs.readdirSync(saveGameDir, {withFileTypes: true}).filter(de => de.isDirectory);
 		if (contents && contents.length > 0) {
 			return path.join(saveGameDir, contents[0].name);
 		} else {
 			return null;
-		}
+		} */
+        return saveGameDir
 	}
 }

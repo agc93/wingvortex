@@ -1,8 +1,7 @@
 ---
 title: "Initial Release"
 linkTitle: "Release 0.0.1"
-
-date: 2000-12-01
+date: 2020-12-01
 aliases:
   - /updates/v0.0.1
 description: >

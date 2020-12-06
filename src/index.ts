@@ -1,9 +1,11 @@
 import { fs, log, util } from "vortex-api";
-import { IDiscoveryResult, IExtensionApi, IExtensionContext, IGameStoreEntry, IInstallResult, IMod, ProgressDelegate } from 'vortex-api/lib/types/api';
+import { IDeployedFile, IDiscoveryResult, IExtensionApi, IExtensionContext, IGameStoreEntry, IInstallResult, IMod, IModTable, ProgressDelegate } from 'vortex-api/lib/types/api';
 import { isGameManaged, UserPaths } from "./util";
 import { Features, GeneralSettings, settingsReducer } from "./settings";
 import { advancedInstall } from "./install";
-import { installedFilesRenderer } from "./attributes";
+import { installedFilesRenderer, skinsAttribute } from "./attributes";
+import { checkForConflicts, refreshSkins, updateSlots } from "./slots";
+
 import { isActiveGame, UnrealGameHelper } from "vortex-ext-common";
 import * as path from 'path';
 
@@ -41,6 +43,17 @@ function main(context: IExtensionContext) {
             // unfortunately this doesn't seem to actually work for some reason.
             // context.api.getI18n().addResources('en', I18N_NAMESPACE, require('./language.json'));
         } catch { }
+        util.installIconSet('wingvortex', path.join(__dirname, 'icons.svg'));
+        context.api.onAsync('did-deploy', (profileId: string, deployment: { [typeId: string]: IDeployedFile[] }) => {
+            if (isActiveGame(context.api, GAME_ID)) {
+                log('debug', 'running PW skin slot event handler');
+                checkForConflicts(context.api, Object.values(deployment).flat());
+            }
+            return Promise.resolve();
+        });
+        context.api.onStateChange(
+            ['persistent', 'mods'],
+            onModsChanged(context.api));
     });
     context.registerGame({
         name: "Project Wingman",
@@ -86,6 +99,11 @@ function main(context: IExtensionContext) {
         condition: () => isActiveGame(context.api, GAME_ID),
         customRenderer: (mod: IMod) => installedFilesRenderer(context.api, mod)
     });
+    context.registerTableAttribute('mods', skinsAttribute(context.api));
+    context.registerAction('mods-action-icons', 201, 'aircraft', {},
+                         'Refresh Skins', (ids) => refreshSkins(context.api, ids), () => isActiveGame(context.api, GAME_ID));
+    context.registerAction('mods-multirow-actions', 201, 'aircraft', {},
+                         'Refresh Skins', (ids) => refreshSkins(context.api, ids), () => isActiveGame(context.api, GAME_ID));
     return true;
 }
 
@@ -113,6 +131,38 @@ async function installContent(api: IExtensionApi, files: string[], destinationPa
     } else {
         return advancedInstall(api, files, destinationPath, gameId, progress);
     }
+}
+
+function onModsChanged(api: IExtensionApi) {
+    if (!isActiveGame(api, GAME_ID)) {
+        return;
+    }
+    let lastModTable = api.store.getState().persistent.mods;
+    log('debug', 'scheduling PW skin update on mods changed')
+
+    const updateDebouncer: util.Debouncer = new util.Debouncer(
+        (newModTable: IModTable) => {
+            if ((lastModTable === undefined) || (newModTable === undefined)) {
+                return;
+            }
+            const state = api.store.getState();
+            // ensure anything changed for the actiave game
+            if ((lastModTable[GAME_ID] !== newModTable[GAME_ID])
+                && (lastModTable[GAME_ID] !== undefined)
+                && (newModTable[GAME_ID] !== undefined)) {
+                var newIds = Object.keys(newModTable[GAME_ID]).filter(x => !Object.keys(lastModTable[GAME_ID]).includes(x));
+                if (!newIds || newIds.length == 0) {
+                    return Promise.resolve();
+                }
+                log('debug', 'invoking PW slot updates', { newIds })
+                return updateSlots(api, newIds.map(i => newModTable[GAME_ID][i]), false);
+            }
+        }, 4000);
+
+    // we can't pass oldValue to the debouncer because that would only include the state
+    // for the last time the debouncer is triggered, missing all other updates
+    return (oldValue: IModTable, newValue: IModTable) =>
+        updateDebouncer.schedule((err: Error) => log('debug', 'Updated skin slots for PW mods', { err }), newValue);
 }
 
 module.exports = {

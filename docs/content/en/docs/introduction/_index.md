@@ -25,3 +25,5 @@ There's some features that we've included to get them in your hands as fast as p
 ### Nexus Mods
 
 To be clear and upfront: being supported in Vortex (using WingVortex) **does not** mean that the Nexus Mods or Vortex team officially supports this extension or any mods you install using it. See [the FAQ](/docs/introduction/faq) for extra details.
+
+The Nexus team has, however, enabled Vortex integration on Nexus Mods for PW so once you have the extension [installed](/docs/usage/installation) you can use the Vortex buttons on the site to quickly install mods.

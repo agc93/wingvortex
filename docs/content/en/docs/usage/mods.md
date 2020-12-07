@@ -18,7 +18,7 @@ If you're installing mods from Nexus Mods, you can use the "Vortex" or "Download
 
 ### Installing archives with multiple mod files
 
-If you install a file from Nexus Mods that has multiple game mod files (i.e. `.pak` files), you will see a prompt that should walk you through the process of choosing which mod files you want to install. Remember that since Vortex doesn't actually read your game files, it won't be able to detect skin slot conflicts automatically.
+If you install a file from Nexus Mods that has multiple game mod files (i.e. `.pak` files), you will see a prompt that should walk you through the process of choosing which mod files you want to install.
 
 ## Install from archives
 

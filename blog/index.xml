@@ -1,4 +1,25 @@
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>WingVortex – Updates</title><link>/blog/</link><description>Recent content in Updates on WingVortex</description><generator>Hugo -- gohugo.io</generator><atom:link href="/blog/index.xml" rel="self" type="application/rss+xml"/><item><title>Blog: Initial Release</title><link>/blog/2020/12/01/initial-release/</link><pubDate>Tue, 01 Dec 2020 00:00:00 +0000</pubDate><guid>/blog/2020/12/01/initial-release/</guid><description>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>WingVortex – Updates</title><link>/blog/</link><description>Recent content in Updates on WingVortex</description><generator>Hugo -- gohugo.io</generator><atom:link href="/blog/index.xml" rel="self" type="application/rss+xml"/><item><title>Blog: Alpha 0.2 Release</title><link>/blog/2020/12/06/alpha-0.2-release/</link><pubDate>Sun, 06 Dec 2020 00:00:00 +0000</pubDate><guid>/blog/2020/12/06/alpha-0.2-release/</guid><description>
+&lt;div class="pageinfo pageinfo-primary">
+&lt;p>This release is now available &lt;a href="https://www.nexusmods.com/site/mods/189?tab=files">on Nexus Mods&lt;/a>.&lt;/p>
+&lt;/div>
+&lt;p>This release is the second alpha of the Project Wingman extension!&lt;/p>
+&lt;p>There&amp;rsquo;s a bunch of updates to this version, some big and some quite small:&lt;/p>
+&lt;ul>
+&lt;li>Skin Detection &lt;sup>PREVIEW&lt;/sup>
+&lt;ul>
+&lt;li>I&amp;rsquo;ve enabled some very basic skin detection that will read your installed mod files and try to determine what skins (if any) are included.&lt;/li>
+&lt;li>You can check what skins a mod adds using the new Skins attribute in the Mods list (enable it from the gear icon in the top-right if its not visible)&lt;/li>
+&lt;li>Vortex will now warn you if you deploy multiple mods that change the same skin slot.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>Minor fixes
+&lt;ul>
+&lt;li>The installer is &lt;em>slightly&lt;/em> more stable than before (mostly thanks to stealing my own code)&lt;/li>
+&lt;li>The Open&amp;hellip; shortcut in your Mods page can now jump quickly to your game folder, mods folder, settings folder, or your user data folder.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;p>You should be able to install mods for Project Wingman from Nexus Mods or external archives in this release and support the basic Vortex features of install/enable/disable/deploy/purge.&lt;/p></description></item><item><title>Blog: Initial Release</title><link>/blog/2020/12/01/initial-release/</link><pubDate>Tue, 01 Dec 2020 00:00:00 +0000</pubDate><guid>/blog/2020/12/01/initial-release/</guid><description>
 &lt;div class="pageinfo pageinfo-primary">
 &lt;p>This release is now available &lt;a href="https://www.nexusmods.com/site/mods/189?tab=files">on Nexus Mods&lt;/a>.&lt;/p>
 &lt;/div>

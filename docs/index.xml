@@ -58,7 +58,7 @@ C:\Users\&amp;lt;your-user-name-here&amp;gt;\AppData\Roaming\Vortex\plugins\game
 &lt;h2 id="installing-from-nexus-mods">Installing from Nexus Mods&lt;/h2>
 &lt;p>If you&amp;rsquo;re installing mods from Nexus Mods, you can use the &amp;ldquo;Vortex&amp;rdquo; or &amp;ldquo;Download with Mod Manager&amp;rdquo; buttons on the mod page to automatically open Vortex and download the mod. Simply Install and Enable like usual and you should be good to go.&lt;/p>
 &lt;h3 id="installing-archives-with-multiple-mod-files">Installing archives with multiple mod files&lt;/h3>
-&lt;p>If you install a file from Nexus Mods that has multiple game mod files (i.e. &lt;code>.pak&lt;/code> files), you will see a prompt that should walk you through the process of choosing which mod files you want to install. Remember that since Vortex doesn&amp;rsquo;t actually read your game files, it won&amp;rsquo;t be able to detect skin slot conflicts automatically.&lt;/p>
+&lt;p>If you install a file from Nexus Mods that has multiple game mod files (i.e. &lt;code>.pak&lt;/code> files), you will see a prompt that should walk you through the process of choosing which mod files you want to install.&lt;/p>
 &lt;h2 id="install-from-archives">Install from archives&lt;/h2>
 &lt;p>You can also download mod archives directly from Nexus Mods or anywhere else you like and install them with Vortex. Simply use the &lt;em>Install From File&lt;/em> button in the toolbar or drop them onto the drop zone at the bottom of the Vortex window.&lt;/p>
 &lt;blockquote>

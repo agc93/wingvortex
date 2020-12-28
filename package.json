@@ -1,6 +1,6 @@
 {
   "name": "game-projectwingman",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Adds support for Project Wingman mods in Vortex",
   "main": "./dist/index.js",
   "scripts": {

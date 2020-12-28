@@ -134,6 +134,10 @@ function buildFlatInstructions(api: IExtensionApi, files: string[], rootPath: st
     const instructions = filtered.map(file => {
         // const destination = file.substr(firstType.indexOf(path.basename(root)) + root.length).replace(/^\\+/g, '');
         var destination = rootPath == '.' ? file : path.join(file.substr(file.indexOf(rootPath) + rootPath.length + 1));
+        if (path.extname(destination).toLowerCase() == MOD_FILE_EXT && !destination.endsWith('_P.pak')) {
+            log('debug', 'detected non-suffixed PAK file!', {destination});
+            destination = destination.replace('.pak', '_P.pak');
+        }
         return {
             type: 'copy' as InstructionType,
             source: file,

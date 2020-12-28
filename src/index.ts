@@ -133,9 +133,9 @@ async function installContent(api: IExtensionApi, files: string[], destinationPa
     }
 }
 
-function onModsChanged(api: IExtensionApi) {
+function onModsChanged(api: IExtensionApi): (oldValue: IModTable, newValue: IModTable) => void {
     if (!isActiveGame(api, GAME_ID)) {
-        return;
+        return () => {};
     }
     let lastModTable = api.store.getState().persistent.mods;
     log('debug', 'scheduling PW skin update on mods changed')

@@ -13,7 +13,7 @@ export function checkForConflicts(api: IExtensionApi, files: IDeployedFile[], co
     var skinMods = Object.values(deployedMods)
         .filter(m => util.getSafe(m.attributes, ['skinSlots'], undefined));
     // var slotRoots = groupBy(skinMods, (mod) => util.getSafe(mod.attributes, ['skinSlots'], ''));
-    var slotRoots = buildConflictList(skinMods);
+    var slotRoots = buildConflictList(skinMods, 'skinSlots');
     if (Object.keys(slotRoots).some(rk => slotRoots[rk].length > 1)) {
         var conflicts = removeNonConflicts(slotRoots);
         if (conflictAction) {
@@ -42,21 +42,48 @@ export function checkForConflicts(api: IExtensionApi, files: IDeployedFile[], co
             });
         }
     }
+    var dtMods = Object.values(deployedMods)
+        .filter(m => util.getSafe(m.attributes, ['datatables'], undefined));
+    var tables = buildConflictList(dtMods, 'datatables');
+    if (Object.keys(tables).some(tk => tables[tk].length > 1)) {
+        var conflictTables = removeNonConflicts(tables);
+        api.sendNotification({
+            'type': 'warning',
+            title: 'Potential data table mod conflict!',
+            message: "It looks like more than one mod is changing the game's data tables.",
+            actions: [
+                {
+                    title: 'See More',
+                    action: (dismiss) => {
+                        api.showDialog('error', 'Potential DataTable mod conflict!', {
+                            text: "It looks like more than one of the mods that was just deployed are modifying the same data table! These mods can't be loaded together as they will overwrite each other, leading to unexpected results. The mods in question and what table they modify are shown below.\n\nYou should disable all but one of the conflicting mods before you launch the game.",
+                            options: {
+                                wrap: false
+                            },
+                            message: renderConflictList(conflictTables, 'Table')
+                        }, [
+                            {label: 'Continue', action: () => dismiss()}
+                        ]);
+                    }
+                }
+            ]
+        });
+    }
 }
 
-function renderConflictList(conflicts: SlotList): string {
+function renderConflictList(conflicts: SlotList, prefix: string = 'Slot'): string {
     return Object.keys(conflicts)
         .map(ck => {
-            return `Slot ${ck.replace('|', '/')}: ${conflicts[ck].map(m => util.getSafe(m.attributes, ['modName'], m.id)).join(', ')}`
+            return `${prefix} ${ck.replace('|', '/')}: ${conflicts[ck].map(m => util.getSafe(m.attributes, ['modName'], m.id)).join(', ')}`
         })
         .join('\n');
 }
 
-function buildConflictList(mods: IMod[]): SlotList {
+function buildConflictList(mods: IMod[], attributeName: string): SlotList {
     var slots: {[key: string]: IMod[]} = {};
     var allSlots = mods.reduce(function (slots, mod) {
 
-        var skins = util.getSafe<string[]>(mod.attributes, ['skinSlots'], []);
+        var skins = util.getSafe<string[]>(mod.attributes, [attributeName], []);
         if (skins) {
             skins.forEach(sk => {
                 // If the key doesn't exist yet, create it
@@ -125,9 +152,24 @@ export async function updateSlots(api: IExtensionApi, mods: IMod[], replace: boo
                 api.store.dispatch(actions.setModAttribute(GAME_ID, mod.id, 'skinSlots', slots));
             } else if (!slots && replace) {
                 // this is actually not an ideal scenario since a failed detection would completely erase a potentially valid one
-                // but given there's currently no way to reverse an incorrect detection, we basically need this
+                // but given there's currently no way to reverse an incorrect detection, we basically need this.
                 // in future, we might want to show a dialog before doing this
                 api.store.dispatch(actions.setModAttribute(GAME_ID, mod.id, 'skinSlots', []));
+            }
+            var tables = files
+                .map(fi => {
+                    var bp = reader.getModifiedDataTable(fi);
+                    if (bp && bp.includesDatatable) {
+                        return bp;
+                    }
+                    return null;
+                })
+                .filter(fii => fii && fii.includesDatatable)
+                .flatMap(i => i.tableName);
+            if (tables) {
+                api.store.dispatch(actions.setModAttribute(GAME_ID, mod.id, 'datatables', tables));
+            } else if (!tables && replace) {
+                api.store.dispatch(actions.setModAttribute(GAME_ID, mod.id, 'datatables', []));
             }
         }
     }

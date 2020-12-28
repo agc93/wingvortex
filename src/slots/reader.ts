@@ -22,6 +22,29 @@ export class SlotReader {
         return Math.min(fileLength, offset + 4096);
     }
 
+    getModifiedDataTable = (filePath: string): {includesDatatable: boolean, tableName?: string} | undefined => {
+        if (nfs.existsSync(filePath) && path.extname(filePath).toLowerCase() == this._modFileExt) {
+            const fileBuffer = nfs.readFileSync(filePath);
+            var searchKey = 'ProjectWingman/Content/ProjectWingman/Blueprints/Data'
+            var getAllIndexes = (arr: Buffer) => {
+                var indexes = [], i = this.getFileOffset(fileBuffer.length);
+                while ((i = arr.indexOf(Buffer.from(searchKey), i+1)) != -1){
+                    indexes.push(i);
+                }
+                return indexes;
+            }
+            var indexes = getAllIndexes(fileBuffer);
+            this._logFn(`identified ${indexes.length} blueprint paths`);
+            for (const key of indexes) {
+                var rawString = fileBuffer.toString('utf8', key + searchKey.length, key + searchKey.length + 72);
+                var match = rawString.replace(/[^\w\d\/\.]/g, '');
+                var tableName = path.basename(match, path.extname(match));
+                return {includesDatatable: tableName && true, tableName: tableName};
+            }
+            return {includesDatatable: false}
+        }
+    }
+
     getSkinIdentifier = (filePath: string): {aircraft: string, slot: string}[] | undefined => {
         var skins: {aircraft: string, slot: string}[] = [];
         if (nfs.existsSync(filePath) && path.extname(filePath).toLowerCase() == this._modFileExt) {

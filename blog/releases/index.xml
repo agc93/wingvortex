@@ -1,4 +1,25 @@
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>WingVortex – Releases</title><link>/blog/releases/</link><description>Recent content in Releases on WingVortex</description><generator>Hugo -- gohugo.io</generator><atom:link href="/blog/releases/index.xml" rel="self" type="application/rss+xml"/><item><title>Blog: Alpha 0.2 Release</title><link>/blog/2020/12/06/alpha-0.2-release/</link><pubDate>Sun, 06 Dec 2020 00:00:00 +0000</pubDate><guid>/blog/2020/12/06/alpha-0.2-release/</guid><description>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>WingVortex – Releases</title><link>/blog/releases/</link><description>Recent content in Releases on WingVortex</description><generator>Hugo -- gohugo.io</generator><atom:link href="/blog/releases/index.xml" rel="self" type="application/rss+xml"/><item><title>Blog: Alpha 0.3 Release</title><link>/blog/2020/12/28/alpha-0.3-release/</link><pubDate>Mon, 28 Dec 2020 00:00:00 +0000</pubDate><guid>/blog/2020/12/28/alpha-0.3-release/</guid><description>
+&lt;div class="pageinfo pageinfo-primary">
+&lt;p>This release is now available &lt;a href="https://www.nexusmods.com/site/mods/189?tab=files">on Nexus Mods&lt;/a>.&lt;/p>
+&lt;/div>
+&lt;p>This release is the third alpha of the Project Wingman extension!&lt;/p>
+&lt;p>There&amp;rsquo;s a bunch of updates to this version, some big and some quite small:&lt;/p>
+&lt;ul>
+&lt;li>DataTable Detection &lt;sup>PREVIEW&lt;/sup>
+&lt;ul>
+&lt;li>I&amp;rsquo;ve enabled some very basic detection that will read your installed mod files and try to determine if more than one of them modifies datatables.&lt;/li>
+&lt;li>Data table modding is what allows for mods like Unreleased Planes, AoA for All and the Prez Everywhere System. You can only have one mod at a time that modifies the same table.&lt;/li>
+&lt;li>Vortex will now warn you if you deploy multiple mods that change the same data table.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>Minor fixes
+&lt;ul>
+&lt;li>No longer creates invalid state change handlers (thanks for the tip Tannin!)&lt;/li>
+&lt;li>Some other minor refactoring&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;p>You should be able to install mods for Project Wingman from Nexus Mods or external archives in this release and support the basic Vortex features of install/enable/disable/deploy/purge.&lt;/p></description></item><item><title>Blog: Alpha 0.2 Release</title><link>/blog/2020/12/06/alpha-0.2-release/</link><pubDate>Sun, 06 Dec 2020 00:00:00 +0000</pubDate><guid>/blog/2020/12/06/alpha-0.2-release/</guid><description>
 &lt;div class="pageinfo pageinfo-primary">
 &lt;p>This release is now available &lt;a href="https://www.nexusmods.com/site/mods/189?tab=files">on Nexus Mods&lt;/a>.&lt;/p>
 &lt;/div>

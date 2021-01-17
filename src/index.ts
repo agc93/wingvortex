@@ -12,6 +12,7 @@ import * as path from 'path';
 export const GAME_ID = 'projectwingman'
 export const I18N_NAMESPACE = 'wingvortex';
 export const STEAMAPP_ID = 895870;
+export const GOGAPP_ID = 1430183808;
 export const MOD_FILE_EXT = ".pak";
 export const unreal: UnrealGameHelper = new UnrealGameHelper(GAME_ID);
 
@@ -23,7 +24,7 @@ export type RunningTools = {[key: string]: {exePath: string, started: any, pid: 
 
 
 export function findGame() {
-    return util.GameStoreHelper.findByAppId(STEAMAPP_ID.toString())
+    return util.GameStoreHelper.findByAppId([STEAMAPP_ID.toString(), GOGAPP_ID.toString()])
         .then((game: IGameStoreEntry) => game.gamePath);
 }
 

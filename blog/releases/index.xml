@@ -1,4 +1,26 @@
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>WingVortex – Releases</title><link>/blog/releases/</link><description>Recent content in Releases on WingVortex</description><generator>Hugo -- gohugo.io</generator><atom:link href="/blog/releases/index.xml" rel="self" type="application/rss+xml"/><item><title>Blog: Alpha 0.3 Release</title><link>/blog/2020/12/28/alpha-0.3-release/</link><pubDate>Mon, 28 Dec 2020 00:00:00 +0000</pubDate><guid>/blog/2020/12/28/alpha-0.3-release/</guid><description>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>WingVortex – Releases</title><link>/blog/releases/</link><description>Recent content in Releases on WingVortex</description><generator>Hugo -- gohugo.io</generator><atom:link href="/blog/releases/index.xml" rel="self" type="application/rss+xml"/><item><title>Blog: Alpha 0.4 Release</title><link>/blog/2021/02/09/alpha-0.4-release/</link><pubDate>Tue, 09 Feb 2021 00:00:00 +0000</pubDate><guid>/blog/2021/02/09/alpha-0.4-release/</guid><description>
+&lt;div class="pageinfo pageinfo-primary">
+&lt;p>This release is now available &lt;a href="https://www.nexusmods.com/site/mods/189?tab=files">on Nexus Mods&lt;/a>.&lt;/p>
+&lt;/div>
+&lt;p>This release is the fourth alpha of the Project Wingman extension!&lt;/p>
+&lt;p>There&amp;rsquo;s a few smaller updates in this version:&lt;/p>
+&lt;ul>
+&lt;li>Incompatible mod detection
+&lt;ul>
+&lt;li>Not all mods for Project Wingman have been properly packed or structured.&lt;/li>
+&lt;li>Some of these mods require manual installation steps for largely unclear reasons&lt;/li>
+&lt;li>Vortex will now try and detect when you install an incompatible mod and warn you beforehand.&lt;/li>
+&lt;li>You will need to contact mod authors to resolve these issues, there&amp;rsquo;s not much Vortex can do here.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>Minor fixes
+&lt;ul>
+&lt;li>Should now correctly auto-detect the GOG version of Project Wingman when installed.&lt;/li>
+&lt;li>Some other minor refactoring&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;p>You should be able to install mods for Project Wingman from Nexus Mods or external archives in this release and support the basic Vortex features of install/enable/disable/deploy/purge.&lt;/p></description></item><item><title>Blog: Alpha 0.3 Release</title><link>/blog/2020/12/28/alpha-0.3-release/</link><pubDate>Mon, 28 Dec 2020 00:00:00 +0000</pubDate><guid>/blog/2020/12/28/alpha-0.3-release/</guid><description>
 &lt;div class="pageinfo pageinfo-primary">
 &lt;p>This release is now available &lt;a href="https://www.nexusmods.com/site/mods/189?tab=files">on Nexus Mods&lt;/a>.&lt;/p>
 &lt;/div>

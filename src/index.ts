@@ -1,8 +1,8 @@
 import { fs, log, util } from "vortex-api";
-import { IDeployedFile, IDiscoveryResult, IExtensionApi, IExtensionContext, IGameStoreEntry, IInstallResult, IMod, IModTable, ProgressDelegate } from 'vortex-api/lib/types/api';
+import { IDeployedFile, IDiscoveryResult, IExtensionApi, IExtensionContext, IGameStoreEntry, IInstallResult, IMod, IModTable, ISupportedResult, ProgressDelegate } from 'vortex-api/lib/types/api';
 import { isGameManaged, UserPaths } from "./util";
 import { Features, GeneralSettings, settingsReducer } from "./settings";
-import { advancedInstall } from "./install";
+import { advancedInstall, unsupportedInstall } from "./install";
 import { installedFilesRenderer, skinsAttribute } from "./attributes";
 import { checkForConflicts, refreshSkins, updateSlots } from "./slots";
 
@@ -33,6 +33,7 @@ function main(context: IExtensionContext) {
     const isWingmanManaged = (): boolean => {
         return isGameManaged(context.api);
     }
+    
     context.registerSettings('Interface', GeneralSettings, undefined, isWingmanManaged, 101);
     context.registerReducer(['settings', 'wingvortex'], settingsReducer);
     context.once(() => {
@@ -82,6 +83,23 @@ function main(context: IExtensionContext) {
             appDataPath: () => UserPaths.userDataPath()
         }
     });
+    context.registerInstaller(
+        'pw-pakx',
+        1,
+        async (files, gameId): Promise<ISupportedResult> => {
+            if (gameId === GAME_ID && files.some(f => path.extname(f) == '.pakx')) {
+                return {
+                    supported: true,
+                    requiredFiles: []
+                }
+            }
+            return {
+                supported: false,
+                requiredFiles: []
+            }
+        },
+        (files, destination, game, progress) => unsupportedInstall(context.api, files, destination, game, progress)
+    )
     context.registerInstaller(
         'pw-pakmods',
         25,

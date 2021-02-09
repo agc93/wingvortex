@@ -9,6 +9,31 @@ import { Features } from "./settings";
 
 type GroupedPaths = { [key: string]: string[] }
 
+export async function unsupportedInstall(api: IExtensionApi, files: string[], destinationPath: string, gameId: string, progress: ProgressDelegate): Promise<IInstallResult> {
+    var messages = [
+        'This mod has been packed incorrectly and cannot be reliably installed. Alternate files should be a separate download or use an installer or you may find unexpected results.',
+        'Please contact the mod authors if you would like this to be compatible.',
+        'If you proceed with the install, you may get unexpected results and installing like this is not recommended.'
+    ];
+    var result: IDialogResult = await api.showDialog('error', 'Incompatible mod structure', {
+        text: messages.join('\n\n')
+    }, [
+        { label: 'Cancel Install' },
+        { label: 'Continue (unsupported)'}
+    ]);
+    if (result.action === 'Continue (unsupported)') {
+        api.sendNotification({
+            type: 'warning',
+            title: 'Installed incompatible mod',
+            message: 'You have installed a malformed mod. You might see unexpected results.'
+        });
+        return await advancedInstall(api, files, destinationPath, gameId, progress);
+    }
+    else {
+        throw new Error("Incompatible mod structure");
+    }
+}
+
 export async function advancedInstall(api: IExtensionApi, files: string[], destinationPath: string, gameId: string, progress: ProgressDelegate): Promise<IInstallResult> {
     //basically need to keep descending until we find a reliable indicator of mod root
     const allPaks = files.filter(file => path.extname(file).toLowerCase() === MOD_FILE_EXT);

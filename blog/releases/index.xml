@@ -1,4 +1,32 @@
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>WingVortex – Releases</title><link>/blog/releases/</link><description>Recent content in Releases on WingVortex</description><generator>Hugo -- gohugo.io</generator><atom:link href="/blog/releases/index.xml" rel="self" type="application/rss+xml"/><item><title>Blog: Alpha 0.4 Release</title><link>/blog/2021/02/09/alpha-0.4-release/</link><pubDate>Tue, 09 Feb 2021 00:00:00 +0000</pubDate><guid>/blog/2021/02/09/alpha-0.4-release/</guid><description>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>WingVortex – Releases</title><link>/blog/releases/</link><description>Recent content in Releases on WingVortex</description><generator>Hugo -- gohugo.io</generator><atom:link href="/blog/releases/index.xml" rel="self" type="application/rss+xml"/><item><title>Blog: Alpha 0.5 Release</title><link>/blog/2021/02/14/alpha-0.5-release/</link><pubDate>Sun, 14 Feb 2021 00:00:00 +0000</pubDate><guid>/blog/2021/02/14/alpha-0.5-release/</guid><description>
+&lt;div class="pageinfo pageinfo-primary">
+&lt;p>This release is now available &lt;a href="https://www.nexusmods.com/site/mods/189?tab=files">on Nexus Mods&lt;/a>.&lt;/p>
+&lt;/div>
+&lt;p>This release is the next alpha of the Project Wingman extension!&lt;/p>
+&lt;p>There&amp;rsquo;s a few smaller updates in this version:&lt;/p>
+&lt;ul>
+&lt;li>Fix some bugs in installation
+&lt;ul>
+&lt;li>Particularly for multi-file installations (with the &amp;ldquo;Advanced Installer&amp;rdquo; enabled), there was some edge cases that could result in bad installs&lt;/li>
+&lt;li>Installs should now be a bit more consistent no matter what combination of files/choices/structure you install&lt;/li>
+&lt;li>Please report any bugs you find with the new installer.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>Preparation for load order support
+&lt;ul>
+&lt;li>Note that Load Order support is &lt;strong>not&lt;/strong> included in this release due to some bugs in Vortex itself&lt;/li>
+&lt;li>I&amp;rsquo;ve added most of the necessary changes to enable load order support in the next release&lt;/li>
+&lt;li>This will actually change how mods are deployed into your game, so keep an eye out for any messages in upcoming versions&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>Minor changes
+&lt;ul>
+&lt;li>This release (and any others before 0.1.0) will include some minor refactorings that should clean the overall extension up&lt;/li>
+&lt;li>You &lt;em>shouldn&amp;rsquo;t&lt;/em> notice any impact from these changes but it should make it easier for me to add new features in future.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;p>You should be able to install mods for Project Wingman from Nexus Mods or external archives in this release and support the basic Vortex features of install/enable/disable/deploy/purge.&lt;/p></description></item><item><title>Blog: Alpha 0.4 Release</title><link>/blog/2021/02/09/alpha-0.4-release/</link><pubDate>Tue, 09 Feb 2021 00:00:00 +0000</pubDate><guid>/blog/2021/02/09/alpha-0.4-release/</guid><description>
 &lt;div class="pageinfo pageinfo-primary">
 &lt;p>This release is now available &lt;a href="https://www.nexusmods.com/site/mods/189?tab=files">on Nexus Mods&lt;/a>.&lt;/p>
 &lt;/div>

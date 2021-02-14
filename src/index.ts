@@ -5,6 +5,7 @@ import { Features, GeneralSettings, settingsReducer } from "./settings";
 import { advancedInstall, unsupportedInstall } from "./install";
 import { installedFilesRenderer, skinsAttribute } from "./attributes";
 import { checkForConflicts, refreshSkins, updateSlots } from "./slots";
+import { filterLoadOrderEnabled, loadOrderChanged, loadOrderInfoRenderer, loadOrderPrefix, preSort } from "./loadOrder";
 
 import { isActiveGame, UnrealGameHelper } from "vortex-ext-common";
 import * as path from 'path';
@@ -106,6 +107,8 @@ function main(context: IExtensionContext) {
         unreal.testSupportedContent,
         (files, destination, gameId, progress) => installContent(context.api, files, destination, gameId, progress)
     );
+    /* context.registerModType('pw-pak-mod', 25, gameId => gameId === GAME_ID, (game) => path.join(getGamePath(game, context.api.getState()), relModPath), 
+    isPakMod, { mergeMods: mod => loadOrderPrefix(context.api, mod) + mod.id , name: 'Project Wingman Mod'}); */
     context.registerTableAttribute('mods', {
         id: 'pw-paks',
         placement: 'detail',
@@ -123,6 +126,15 @@ function main(context: IExtensionContext) {
                          'Refresh Skins', (ids) => refreshSkins(context.api, ids), () => isActiveGame(context.api, GAME_ID));
     context.registerAction('mods-multirow-actions', 201, 'aircraft', {},
                          'Refresh Skins', (ids) => refreshSkins(context.api, ids), () => isActiveGame(context.api, GAME_ID));
+    /* context.registerLoadOrderPage({
+        gameId: GAME_ID,
+        gameArtURL: `${__dirname}\\gameart.png`,
+        preSort: (items, direction) => preSort(context.api, items, direction),
+        filter: filterLoadOrderEnabled,
+        displayCheckboxes: false,
+        callback: (loadOrder, type) => loadOrderChanged(context.api, loadOrder, type),
+        createInfoPanel: (props) => loadOrderInfoRenderer(context.api, props)
+    }); */
     return true;
 }
 

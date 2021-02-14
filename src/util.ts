@@ -1,6 +1,6 @@
-import { IExtensionApi, IProfile } from "vortex-api/lib/types/api";
+import { IExtensionApi, IInstruction, IProfile } from "vortex-api/lib/types/api";
 import { util } from "vortex-api";
-import { GAME_ID } from ".";
+import { GAME_ID, MOD_FILE_EXT } from ".";
 
 import path = require('path');
 import { remote } from 'electron';
@@ -25,6 +25,10 @@ export const groupBy = function<T> (arr: T[], criteria: string|((obj:T) => strin
 
 	}, {});
 };
+
+export function isPakMod(installInstructions: IInstruction[]): boolean {
+	return installInstructions.map(i => i.source).some(f => path.extname(f) == MOD_FILE_EXT)
+}
 
 export function isGameManaged(api: IExtensionApi): boolean {
     var profiles: {[profileId: string]: IProfile} = {};

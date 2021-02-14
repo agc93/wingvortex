@@ -144,7 +144,7 @@ async function installMultipleModArchive(api: IExtensionApi, selections: string[
             return Promise.resolve(instructions);
         }
     } else {
-        var instructions = selections.flatMap(k => buildInstructions(files, pakRoots[k][0]));
+        var instructions = selections.flatMap(k => buildFlatInstructions(api, files, k));
         return Promise.resolve(instructions);
     }
 }

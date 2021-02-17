@@ -2,7 +2,7 @@ import { fs, log, util } from "vortex-api";
 import { IDeployedFile, IDiscoveryResult, IExtensionApi, IExtensionContext, IGameStoreEntry, IInstallResult, IMod, IModTable, ISupportedResult, ProgressDelegate } from 'vortex-api/lib/types/api';
 import { isGameManaged, UserPaths } from "./util";
 import { Features, GeneralSettings, settingsReducer } from "./settings";
-import { advancedInstall, unsupportedInstall } from "./install";
+import { advancedInstall, getInstaller, unsupportedInstall } from "./install";
 import { installedFilesRenderer, skinsAttribute } from "./attributes";
 import { checkForConflicts, refreshSkins, updateSlots } from "./slots";
 import { filterLoadOrderEnabled, loadOrderChanged, loadOrderInfoRenderer, loadOrderPrefix, preSort } from "./loadOrder";
@@ -84,7 +84,8 @@ function main(context: IExtensionContext) {
             appDataPath: () => UserPaths.userDataPath()
         }
     });
-    context.registerInstaller(
+    var installer = getInstaller(context.api);
+    /* context.registerInstaller(
         'pw-pakx',
         1,
         async (files, gameId): Promise<ISupportedResult> => {
@@ -100,13 +101,19 @@ function main(context: IExtensionContext) {
             }
         },
         (files, destination, game, progress) => unsupportedInstall(context.api, files, destination, game, progress)
-    )
+    ) */
     context.registerInstaller(
+        'pw-pakmods-advanced',
+        25,
+        installer.testSupported,
+        installer.advancedInstall
+    );
+    /* context.registerInstaller(
         'pw-pakmods',
         25,
         unreal.testSupportedContent,
         (files, destination, gameId, progress) => installContent(context.api, files, destination, gameId, progress)
-    );
+    ); */
     /* context.registerModType('pw-pak-mod', 25, gameId => gameId === GAME_ID, (game) => path.join(getGamePath(game, context.api.getState()), relModPath), 
     isPakMod, { mergeMods: mod => loadOrderPrefix(context.api, mod) + mod.id , name: 'Project Wingman Mod'}); */
     context.registerTableAttribute('mods', {

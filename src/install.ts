@@ -2,19 +2,38 @@ import { IExtensionApi, ProgressDelegate, IInstallResult, IDialogResult, ICheckb
 import path = require("path");
 import { log, util } from "vortex-api";
 import { groupBy } from "./util";
-import { MOD_FILE_EXT, unreal } from ".";
+import { GAME_ID, MOD_FILE_EXT, unreal } from ".";
 import { InstructionType } from "vortex-api/lib/extensions/mod_management/types/IInstallResult";
 import { getModName } from "vortex-ext-common/util";
+import { AdvancedInstaller, AdvancedInstallerBuilder, CompatibilityResult, CompatibilityTest } from "vortex-ext-common/install/advanced";
 import { Features } from "./settings";
 
 type GroupedPaths = { [key: string]: string[] }
 
+var messages = [
+    'This mod has been packed incorrectly and cannot be reliably installed. Alternate files should be a separate download or use an installer or you may find unexpected results.',
+    'Please contact the mod authors if you would like this to be compatible.',
+    'If you proceed with the install, you may get unexpected results and installing like this is not recommended.'
+];
+
+export function getInstaller(api: IExtensionApi): AdvancedInstaller {
+    var builder = new AdvancedInstallerBuilder(GAME_ID);
+    var installer = builder
+        .addExtender((inst, files, name) => getPaks(inst))
+        .addCompatibilityTest(unsupportedFileTest)
+        .addExtender(getReadmeInstructions, Features.readmesEnabled)
+        .build(api);
+    return installer;
+}
+
+const unsupportedFileTest: CompatibilityTest = {
+    message: messages.join('\n\n'),
+    shortMessage: 'You have installed a malformed mod. You might see unexpected results.',
+    test: (files) => files.some(f => path.extname(f) == '.pakx') ? CompatibilityResult.RequiresConfirmation : CompatibilityResult.None
+};
+
 export async function unsupportedInstall(api: IExtensionApi, files: string[], destinationPath: string, gameId: string, progress: ProgressDelegate): Promise<IInstallResult> {
-    var messages = [
-        'This mod has been packed incorrectly and cannot be reliably installed. Alternate files should be a separate download or use an installer or you may find unexpected results.',
-        'Please contact the mod authors if you would like this to be compatible.',
-        'If you proceed with the install, you may get unexpected results and installing like this is not recommended.'
-    ];
+    
     var result: IDialogResult = await api.showDialog('error', 'Incompatible mod structure', {
         text: messages.join('\n\n')
     }, [
@@ -209,6 +228,26 @@ function getPaks(instructions: IInstruction[]): IInstruction[] {
             }
         ]
     };
+}
+
+function getReadmeInstructions(instructions: IInstruction[], files: string[], modName: string): IInstruction[] {
+    try {
+        if (files.filter(f => path.extname(f) == '.txt').length == 1) {
+            //we've got just one txt file, assume it's a README
+            var textFile = files.find(f => path.extname(f) == '.txt');
+            log('debug', 'found txt file in archive, installing as README', {filePath: textFile});
+            return [
+                {
+                    type: 'copy',
+                    source: textFile,
+                    destination: path.join('README', util.deriveInstallName(modName, {}) + '.txt')
+                }
+            ]
+        }
+    } catch {
+        //ignored
+        return [];
+    }
 }
 
 function getReadme(files: string[], destinationPath: string) : IInstruction[] {

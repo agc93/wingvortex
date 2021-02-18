@@ -1,14 +1,9 @@
-import { IExtensionApi, ProgressDelegate, IInstallResult, IDialogResult, ICheckbox, IInstruction } from "vortex-api/lib/types/api";
+import { IExtensionApi, IInstruction } from "vortex-api/lib/types/api";
 import path = require("path");
 import { log, util } from "vortex-api";
-import { groupBy } from "./util";
 import { GAME_ID, MOD_FILE_EXT, unreal } from ".";
-import { InstructionType } from "vortex-api/lib/extensions/mod_management/types/IInstallResult";
-import { getModName } from "vortex-ext-common/util";
-import { AdvancedInstaller, AdvancedInstallerBuilder, CompatibilityResult, CompatibilityTest } from "vortex-ext-common/install/advanced";
+import { AdvancedInstaller, AdvancedInstallerBuilder, CompatibilityResult, CompatibilityTest, addInstalledPaksAttribute } from "vortex-ext-common/install/advanced";
 import { Features } from "./settings";
-
-type GroupedPaths = { [key: string]: string[] }
 
 var messages = [
     'This mod has been packed incorrectly and cannot be reliably installed. Alternate files should be a separate download or use an installer or you may find unexpected results.',
@@ -16,13 +11,14 @@ var messages = [
     'If you proceed with the install, you may get unexpected results and installing like this is not recommended.'
 ];
 
-export function getInstaller(api: IExtensionApi): AdvancedInstaller {
+export function getInstaller(): AdvancedInstaller {
     var builder = new AdvancedInstallerBuilder(GAME_ID);
     var installer = builder
-        .addExtender((inst, files, name) => getPaks(inst))
-        .addCompatibilityTest(unsupportedFileTest)
+        .addExtender(addInstalledPaksAttribute(MOD_FILE_EXT))
         .addExtender(getReadmeInstructions, Features.readmesEnabled)
-        .build(api);
+        .addCompatibilityTest(unsupportedFileTest)
+        .addSupportedCheck(async (files, gameId, state)=> {return {supported: Features.isInstallerEnabled(state), requiredFiles: []}})
+        .build();
     return installer;
 }
 
@@ -32,188 +28,6 @@ const unsupportedFileTest: CompatibilityTest = {
     test: (files) => files.some(f => path.extname(f) == '.pakx') ? CompatibilityResult.RequiresConfirmation : CompatibilityResult.None
 };
 
-export async function unsupportedInstall(api: IExtensionApi, files: string[], destinationPath: string, gameId: string, progress: ProgressDelegate): Promise<IInstallResult> {
-    
-    var result: IDialogResult = await api.showDialog('error', 'Incompatible mod structure', {
-        text: messages.join('\n\n')
-    }, [
-        { label: 'Cancel Install' },
-        { label: 'Continue (unsupported)'}
-    ]);
-    if (result.action === 'Continue (unsupported)') {
-        api.sendNotification({
-            type: 'warning',
-            title: 'Installed incompatible mod',
-            message: 'You have installed a malformed mod. You might see unexpected results.'
-        });
-        return await advancedInstall(api, files, destinationPath, gameId, progress);
-    }
-    else {
-        throw new Error("Incompatible mod structure");
-    }
-}
-
-export async function advancedInstall(api: IExtensionApi, files: string[], destinationPath: string, gameId: string, progress: ProgressDelegate): Promise<IInstallResult> {
-    //basically need to keep descending until we find a reliable indicator of mod root
-    const allPaks = files.filter(file => path.extname(file).toLowerCase() === MOD_FILE_EXT);
-    const uniquePakRoots = groupBy(allPaks, (pakPath) => {
-        return path.dirname(pakPath);
-    });
-    let installInstructions: IInstruction[] = [];
-    var keys = Object.keys(uniquePakRoots);
-    if (allPaks.length > 100 || keys.length > 9 ) {
-        var confirmResult: IDialogResult = await api.showDialog('info', 'Large mod detected!', {
-            text: largeModWarningText
-        }, [
-            {label: 'Cancel'},
-            {label: 'Continue'}
-        ]);
-        if (confirmResult.action == 'Cancel') {
-            return Promise.reject();
-        }
-    }
-    log('debug', 'separated pak roots', {roots: keys});
-    if (!uniquePakRoots || keys.length == 0) {
-        log('warn', "Couldn't find reliable root indicator in file list!");
-        return Promise.reject();
-    } else if (keys.length == 1) {
-        if (uniquePakRoots[keys[0]].length > 1) {
-            installInstructions = await installMultipleModArchive(api, keys, uniquePakRoots, files);
-        } else {
-            // var unrealResult = await unreal.installContent(files, destinationPath, gameId, null);
-            // installInstructions = unrealResult.instructions;
-            installInstructions = buildFlatInstructions(api, files, keys[0]);
-        }
-    } else if (keys.length > 1) {
-        installInstructions = await installFromMultiplePaths(api, uniquePakRoots, files);
-    }
-    let instructions = installInstructions;
-    if (Features.readmesEnabled(api.getState())) {
-        instructions = instructions.concat(getReadme(files, destinationPath) ?? []);
-    }
-    instructions = instructions.concat(getPaks(installInstructions) ?? []);
-    return Promise.resolve({instructions})
-}
-
-async function installFromMultiplePaths(api: IExtensionApi, pakRoots: GroupedPaths, files: string[]): Promise<IInstruction[]> {
-    var keys = Object.keys(pakRoots);
-    var result: IDialogResult = await api.showDialog(
-        'question',
-        'Multiple mod files detected',
-        {
-            text: `The mod package you are installing appears to contain multiple nested mod packages! We found ${keys.length} mod locations in the archive.\n\nYou can either cancel now and verify the mod is packaged correctly, or attempt to install all of them together. This will probably cause conflicts!\n\nAlternatively, you can select only the paths you want to install from below and choose Install Selected to install paks from only those folders.`,
-            checkboxes: keys.map(k => {
-                return {
-                    id: k,
-                    text: `${path.basename(k)} (${pakRoots[k].length} files)`
-                } as ICheckbox
-            }),
-            options: {
-                translated: false
-            }
-        },
-        [
-            { label: 'Cancel' },
-            { label: 'Install Selected' },
-            { label: 'Install All_plural' }
-        ]
-    );
-    if (result.action == 'Cancel') {
-        return Promise.reject('Multiple mod paths located!');
-    } else if (result.action == 'Install All' || result.action == 'Install All_plural') {
-        log('debug', JSON.stringify(result.input));
-        let instructions: IInstruction[] = [];
-        instructions = keys.flatMap(k => buildFlatInstructions(api, files, k));
-        return Promise.resolve(instructions);
-    } else if (result.action == 'Install Selected') {
-        var selections: string[] = Object.keys(result.input).filter(s => result.input[s]);
-        // var selectedRoots = selections.map(sv => parseInt(sv.split('-')[1])).map(si => uniquePakRoots[si]);
-        return await installMultipleModArchive(api, selections, pakRoots, files);
-    }
-}
-
-async function installMultipleModArchive(api: IExtensionApi, selections: string[], pakRoots: GroupedPaths, files: string[]): Promise<IInstruction[]> {
-    var selectedRoots = selections.map(sk => pakRoots[sk]);
-    if (selectedRoots.some(sr => sr.length > 1)) {
-
-        var pakResult: IDialogResult = await api.showDialog(
-            'question',
-            'Multiple mod files detected',
-            {
-                text: `The mod package or paths you are installing contain multiple mod files!\n\nYou can individually disable any mod files below to skip installing them or choose Install Selected to continue with all the selected files.`,
-                checkboxes: selectedRoots.flatMap(sr => sr).map(k => {
-                    return {
-                        id: k,
-                        text: `${k}`,
-                        value: true
-                    } as ICheckbox
-                })
-            },
-            [
-                { label: 'Cancel' },
-                { label: 'Install Selected' }
-            ]
-        );
-        if (pakResult.action == 'Cancel') {
-            return Promise.reject('Multiple mod paths located!');
-        } else if (pakResult.action == 'Install Selected') {
-            let instructions: IInstruction[] = [];
-            var modSelections: string[] = Object.keys(pakResult.input).filter(s => pakResult.input[s]);
-            instructions = selections.flatMap(k => buildFlatInstructions(api, files, k, (file) => modSelections.map(s => path.basename(s)).some(bn => bn == path.basename(file))));
-            return Promise.resolve(instructions);
-        }
-    } else {
-        var instructions = selections.flatMap(k => buildFlatInstructions(api, files, k));
-        return Promise.resolve(instructions);
-    }
-}
-
-function buildFlatInstructions(api: IExtensionApi, files: string[], rootPath: string, sourceFilter?: (sourceFile: string) => boolean) {
-    log('debug', 'building installer instructions', {rootPath, files});
-    let filtered = files.filter(f => (!f.endsWith(path.sep)) && path.dirname(f) == rootPath);
-    if (sourceFilter) {
-        filtered = filtered.filter(ff => sourceFilter(ff));
-    }
-    log('debug', 'filtered extraneous files', { root: rootPath, candidates: filtered });
-    const instructions = filtered.map(file => {
-        // const destination = file.substr(firstType.indexOf(path.basename(root)) + root.length).replace(/^\\+/g, '');
-        var destination = rootPath == '.' ? file : path.join(file.substr(file.indexOf(rootPath) + rootPath.length + 1));
-        if (path.extname(destination).toLowerCase() == MOD_FILE_EXT && !destination.endsWith('_P.pak')) {
-            log('debug', 'detected non-suffixed PAK file!', {destination});
-            destination = destination.replace('.pak', '_P.pak');
-        }
-        return {
-            type: 'copy' as InstructionType,
-            source: file,
-            destination: destination
-        }
-    });
-    return instructions;
-}
-
-function buildInstructions(files: string[], modFile: string, sourceFilter?: (sourceFile: string) => boolean) {
-    const idx = modFile.indexOf(path.basename(modFile));
-    const rootPath = path.dirname(modFile);
-    let filtered = files.filter(file =>
-        ((file.indexOf(rootPath) !== -1)
-            && (!file.endsWith(path.sep))));
-    filtered = filtered.filter(f => path.relative(rootPath, f) == '');
-    // const filtered = files.filter(file => (((root == "." ? true : (file.indexOf(root) !== -1)) && (!file.endsWith(path.sep)))));
-    if (sourceFilter) {
-        filtered = filtered.filter(ff => sourceFilter(ff));
-    }
-    log('debug', 'filtered extraneous files', { root: rootPath, candidates: filtered });
-    const instructions = filtered.map(file => {
-        // const destination = file.substr(firstType.indexOf(path.basename(root)) + root.length).replace(/^\\+/g, '');
-        const destination = path.join(file.substr(idx));
-        return {
-            type: 'copy' as InstructionType,
-            source: file,
-            destination: destination
-        }
-    });
-    return instructions;
-}
 
 function getPaks(instructions: IInstruction[]): IInstruction[] {
     var paks = instructions
@@ -236,27 +50,6 @@ function getReadmeInstructions(instructions: IInstruction[], files: string[], mo
             //we've got just one txt file, assume it's a README
             var textFile = files.find(f => path.extname(f) == '.txt');
             log('debug', 'found txt file in archive, installing as README', {filePath: textFile});
-            return [
-                {
-                    type: 'copy',
-                    source: textFile,
-                    destination: path.join('README', util.deriveInstallName(modName, {}) + '.txt')
-                }
-            ]
-        }
-    } catch {
-        //ignored
-        return [];
-    }
-}
-
-function getReadme(files: string[], destinationPath: string) : IInstruction[] {
-    try {
-        if (files.filter(f => path.extname(f) == '.txt').length == 1) {
-            //we've got just one txt file, assume it's a README
-            var textFile = files.find(f => path.extname(f) == '.txt');
-            log('debug', 'found txt file in archive, installing as README', {filePath: textFile});
-            var modName = getModName(destinationPath);
             return [
                 {
                     type: 'copy',

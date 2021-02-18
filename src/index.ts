@@ -2,7 +2,7 @@ import { fs, log, util } from "vortex-api";
 import { IDeployedFile, IDiscoveryResult, IExtensionApi, IExtensionContext, IGameStoreEntry, IInstallResult, IMod, IModTable, ISupportedResult, ProgressDelegate } from 'vortex-api/lib/types/api';
 import { isGameManaged, UserPaths } from "./util";
 import { Features, GeneralSettings, settingsReducer } from "./settings";
-import { advancedInstall, getInstaller, unsupportedInstall } from "./install";
+import { getInstaller } from "./install";
 import { installedFilesRenderer, skinsAttribute } from "./attributes";
 import { checkForConflicts, refreshSkins, updateSlots } from "./slots";
 import { filterLoadOrderEnabled, loadOrderChanged, loadOrderInfoRenderer, loadOrderPrefix, preSort } from "./loadOrder";
@@ -39,6 +39,7 @@ function main(context: IExtensionContext) {
     context.registerSettings('Interface', GeneralSettings, undefined, isWingmanManaged, 101);
     context.registerReducer(['settings', 'wingvortex'], settingsReducer);
     var evt = new EventHandler(context.api, GAME_ID);
+    var installer = getInstaller();
     context.once(() => {
         log('debug', 'initialising your new extension!');
         try {
@@ -51,25 +52,14 @@ function main(context: IExtensionContext) {
         util.installIconSet('wingvortex', path.join(__dirname, 'icons.svg'));
         
         evt.didDeploy(context.api, async (_, deployment) => checkForConflicts(context.api, Object.values(deployment).flat()), {name: 'Skin slot detection'});
-        // var deploy = evt.didDeploy;
-        // context.api.onAsync('did-deploy', evt.didDeployListener(async (_, deployment) => checkForConflicts(context.api, Object.values(deployment).flat())));
-        /* context.api.onAsync('did-deploy', (profileId: string, deployment: { [typeId: string]: IDeployedFile[] }) => {
-            if (isActiveGame(context.api, GAME_ID)) {
-                log('debug', 'running PW skin slot event handler');
-                checkForConflicts(context.api, Object.values(deployment).flat());
-            }
-            return Promise.resolve();
-        }); */
         context.api.onStateChange(
             ['persistent', 'mods', GAME_ID],
             evt.onGameModsChanged(async (current, changes) => {
                 log('debug', 'invoking evt handler');
-                debugger;
+                // debugger;
                 updateSlots(context.api, changes.addedMods, false);
             }));
-        /* context.api.onStateChange(
-                ['persistent', 'mods'],
-                onModsChanged(context.api)); */
+        installer.configure(context.api);
     });
     context.registerGame({
         name: "Project Wingman",
@@ -97,7 +87,6 @@ function main(context: IExtensionContext) {
             appDataPath: () => UserPaths.userDataPath()
         }
     });
-    var installer = getInstaller(context.api);
     context.registerInstaller(
         'pw-pakmods-advanced',
         25,
@@ -157,7 +146,7 @@ async function getLauncher(gamePath: string): Promise<{ launcher: string, addInf
  *
  * @returns Install instructions for mapping mod files to output location.
  */
-async function installContent(api: IExtensionApi, files: string[], destinationPath: string, gameId: string, progress: ProgressDelegate): Promise<IInstallResult> {
+/* async function installContent(api: IExtensionApi, files: string[], destinationPath: string, gameId: string, progress: ProgressDelegate): Promise<IInstallResult> {
     log('debug', `running wingvortex installer. [${gameId}]`, { files, destinationPath });
     var enableAdvanced = Features.isInstallerEnabled(api.getState());
     if (!enableAdvanced) {
@@ -165,39 +154,7 @@ async function installContent(api: IExtensionApi, files: string[], destinationPa
     } else {
         return advancedInstall(api, files, destinationPath, gameId, progress);
     }
-}
-
-function onModsChanged(api: IExtensionApi): (oldValue: IModTable, newValue: IModTable) => void {
-    if (!isActiveGame(api, GAME_ID)) {
-        return () => {};
-    }
-    let lastModTable = api.store.getState().persistent.mods;
-    log('debug', 'scheduling PW skin update on mods changed')
-
-    const updateDebouncer: util.Debouncer = new util.Debouncer(
-        (newModTable: IModTable) => {
-            if ((lastModTable === undefined) || (newModTable === undefined)) {
-                return;
-            }
-            const state = api.store.getState();
-            // ensure anything changed for the actiave game
-            if ((lastModTable[GAME_ID] !== newModTable[GAME_ID])
-                && (lastModTable[GAME_ID] !== undefined)
-                && (newModTable[GAME_ID] !== undefined)) {
-                var newIds = Object.keys(newModTable[GAME_ID]).filter(x => !Object.keys(lastModTable[GAME_ID]).includes(x));
-                if (!newIds || newIds.length == 0) {
-                    return Promise.resolve();
-                }
-                log('debug', 'invoking PW slot updates', { newIds })
-                return updateSlots(api, newIds.map(i => newModTable[GAME_ID][i]), false);
-            }
-        }, 4000);
-
-    // we can't pass oldValue to the debouncer because that would only include the state
-    // for the last time the debouncer is triggered, missing all other updates
-    return (oldValue: IModTable, newValue: IModTable) =>
-        updateDebouncer.schedule((err: Error) => log('debug', 'Updated skin slots for PW mods', { err }), newValue);
-}
+} */
 
 module.exports = {
     default: main,

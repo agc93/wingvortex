@@ -2,12 +2,13 @@ import { fs, log, util } from "vortex-api";
 import { IDeployedFile, IDiscoveryResult, IExtensionApi, IExtensionContext, IGameStoreEntry, IInstallResult, IMod, IModTable, ISupportedResult, ProgressDelegate } from 'vortex-api/lib/types/api';
 import { isGameManaged, UserPaths } from "./util";
 import { Features, GeneralSettings, settingsReducer } from "./settings";
-import { advancedInstall, unsupportedInstall } from "./install";
+import { advancedInstall, getInstaller, unsupportedInstall } from "./install";
 import { installedFilesRenderer, skinsAttribute } from "./attributes";
 import { checkForConflicts, refreshSkins, updateSlots } from "./slots";
 import { filterLoadOrderEnabled, loadOrderChanged, loadOrderInfoRenderer, loadOrderPrefix, preSort } from "./loadOrder";
 
 import { isActiveGame, UnrealGameHelper } from "vortex-ext-common";
+import { EventHandler } from "vortex-ext-common/events";
 import * as path from 'path';
 
 export const GAME_ID = 'projectwingman'
@@ -37,6 +38,7 @@ function main(context: IExtensionContext) {
     
     context.registerSettings('Interface', GeneralSettings, undefined, isWingmanManaged, 101);
     context.registerReducer(['settings', 'wingvortex'], settingsReducer);
+    var evt = new EventHandler(context.api, GAME_ID);
     context.once(() => {
         log('debug', 'initialising your new extension!');
         try {
@@ -47,16 +49,27 @@ function main(context: IExtensionContext) {
             // context.api.getI18n().addResources('en', I18N_NAMESPACE, require('./language.json'));
         } catch { }
         util.installIconSet('wingvortex', path.join(__dirname, 'icons.svg'));
-        context.api.onAsync('did-deploy', (profileId: string, deployment: { [typeId: string]: IDeployedFile[] }) => {
+        
+        evt.didDeploy(context.api, async (_, deployment) => checkForConflicts(context.api, Object.values(deployment).flat()), {name: 'Skin slot detection'});
+        // var deploy = evt.didDeploy;
+        // context.api.onAsync('did-deploy', evt.didDeployListener(async (_, deployment) => checkForConflicts(context.api, Object.values(deployment).flat())));
+        /* context.api.onAsync('did-deploy', (profileId: string, deployment: { [typeId: string]: IDeployedFile[] }) => {
             if (isActiveGame(context.api, GAME_ID)) {
                 log('debug', 'running PW skin slot event handler');
                 checkForConflicts(context.api, Object.values(deployment).flat());
             }
             return Promise.resolve();
-        });
+        }); */
         context.api.onStateChange(
-            ['persistent', 'mods'],
-            onModsChanged(context.api));
+            ['persistent', 'mods', GAME_ID],
+            evt.onGameModsChanged(async (current, changes) => {
+                log('debug', 'invoking evt handler');
+                debugger;
+                updateSlots(context.api, changes.addedMods, false);
+            }));
+        /* context.api.onStateChange(
+                ['persistent', 'mods'],
+                onModsChanged(context.api)); */
     });
     context.registerGame({
         name: "Project Wingman",
@@ -84,29 +97,19 @@ function main(context: IExtensionContext) {
             appDataPath: () => UserPaths.userDataPath()
         }
     });
+    var installer = getInstaller(context.api);
     context.registerInstaller(
-        'pw-pakx',
-        1,
-        async (files, gameId): Promise<ISupportedResult> => {
-            if (gameId === GAME_ID && files.some(f => path.extname(f) == '.pakx')) {
-                return {
-                    supported: true,
-                    requiredFiles: []
-                }
-            }
-            return {
-                supported: false,
-                requiredFiles: []
-            }
-        },
-        (files, destination, game, progress) => unsupportedInstall(context.api, files, destination, game, progress)
-    )
-    context.registerInstaller(
+        'pw-pakmods-advanced',
+        25,
+        installer.testSupported,
+        installer.advancedInstall
+    );
+    /* context.registerInstaller(
         'pw-pakmods',
         25,
         unreal.testSupportedContent,
         (files, destination, gameId, progress) => installContent(context.api, files, destination, gameId, progress)
-    );
+    ); */
     /* context.registerModType('pw-pak-mod', 25, gameId => gameId === GAME_ID, (game) => path.join(getGamePath(game, context.api.getState()), relModPath), 
     isPakMod, { mergeMods: mod => loadOrderPrefix(context.api, mod) + mod.id , name: 'Project Wingman Mod'}); */
     context.registerTableAttribute('mods', {

@@ -8,6 +8,7 @@ import nfs = require('fs');
 type SlotList = {[key: string]: IMod[]};
 
 export function checkForConflicts(api: IExtensionApi, files: IDeployedFile[], conflictAction?: (slots: SlotList) => any) {
+    log('debug', 'checking for PW skin conflicts');
     var mods = util.getSafe<ModList>(api.getState().persistent, ['mods', GAME_ID], {});
     var deployedMods = [...new Set(files.map(f => mods[f.source]))];
     var skinMods = Object.values(deployedMods)

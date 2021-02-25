@@ -20,7 +20,7 @@ export const unreal: UnrealGameHelper = new UnrealGameHelper(GAME_ID);
 
 export type ModList = { [modId: string]: IMod; };
 
-const relModPath = path.join('ProjectWingman', 'Content', 'Paks', '~mods');
+export const relModPath = path.join('ProjectWingman', 'Content', 'Paks', '~mods');
 
 export type RunningTools = {[key: string]: {exePath: string, started: any, pid: number, exclusive: boolean}};
 
@@ -51,7 +51,7 @@ function main(context: IExtensionContext) {
         } catch { }
         util.installIconSet('wingvortex', path.join(__dirname, 'icons.svg'));
         
-        evt.didDeploy(context.api, async (_, deployment) => checkForConflicts(context.api, Object.values(deployment).flat()), {name: 'Skin slot detection'});
+        evt.didDeploy(async (_, deployment) => checkForConflicts(context.api, Object.values(deployment).flat()), {name: 'Skin slot detection'});
         context.api.onStateChange(
             ['persistent', 'mods', GAME_ID],
             evt.onGameModsChanged(async (current, changes) => {

@@ -3,6 +3,8 @@ ModId: 189
 FileName: Project Wingman Support for Vortex
 PreviousFile: auto
 FileDescription: |-
+  Requires Vortex ^ 1.4.0
+
   Download and install using the Extensions pane in Vortex.
 
   To manually install, extract the zip to %APPDATA%\Vortex\plugins\game-projectwingman.

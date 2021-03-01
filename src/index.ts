@@ -5,10 +5,12 @@ import { Features, GeneralSettings, settingsReducer } from "./settings";
 import { getInstaller } from "./install";
 import { installedFilesRenderer, skinsAttribute } from "./attributes";
 import { checkForConflicts, refreshSkins, updateSlots } from "./slots";
-import { filterLoadOrderEnabled, loadOrderChanged, loadOrderInfoRenderer, loadOrderPrefix, preSort } from "./loadOrder";
+import { getLoadOrderHandler } from "./loadOrder";
+import { update010, migrate010 } from "./migrations";
 
 import { isActiveGame, UnrealGameHelper } from "vortex-ext-common";
 import { EventHandler } from "vortex-ext-common/events";
+import { migrationHandler } from "vortex-ext-common/migrations";
 import * as path from 'path';
 
 export const GAME_ID = 'projectwingman'
@@ -20,7 +22,7 @@ export const unreal: UnrealGameHelper = new UnrealGameHelper(GAME_ID);
 
 export type ModList = { [modId: string]: IMod; };
 
-const relModPath = path.join('ProjectWingman', 'Content', 'Paks', '~mods');
+export const relModPath = path.join('ProjectWingman', 'Content', 'Paks', '~mods');
 
 export type RunningTools = {[key: string]: {exePath: string, started: any, pid: number, exclusive: boolean}};
 
@@ -51,7 +53,7 @@ function main(context: IExtensionContext) {
         } catch { }
         util.installIconSet('wingvortex', path.join(__dirname, 'icons.svg'));
         
-        evt.didDeploy(context.api, async (_, deployment) => checkForConflicts(context.api, Object.values(deployment).flat()), {name: 'Skin slot detection'});
+        evt.didDeploy(async (_, deployment) => checkForConflicts(context.api, Object.values(deployment).flat()), {name: 'Skin slot detection'});
         context.api.onStateChange(
             ['persistent', 'mods', GAME_ID],
             evt.onGameModsChanged(async (current, changes) => {
@@ -118,6 +120,8 @@ function main(context: IExtensionContext) {
                          'Refresh Skins', (ids) => refreshSkins(context.api, ids), () => isActiveGame(context.api, GAME_ID));
     context.registerAction('mods-multirow-actions', 201, 'aircraft', {},
                          'Refresh Skins', (ids) => refreshSkins(context.api, ids), () => isActiveGame(context.api, GAME_ID));
+    context.registerMigration(migrationHandler(context.api, GAME_ID, update010, migrate010));
+    // context.registerLoadOrder(getLoadOrderHandler(context.api));
     /* context.registerLoadOrderPage({
         gameId: GAME_ID,
         gameArtURL: `${__dirname}\\gameart.png`,
@@ -133,28 +137,6 @@ function main(context: IExtensionContext) {
 async function getLauncher(gamePath: string): Promise<{ launcher: string, addInfo?: any }> {
     return gamePath.includes('steamapps') ? {launcher: 'steam'} : undefined;
 }
-
-/**
- * The main extension installer implementation.
- * @remarks
- * The main logic for this was mostly borrowed from agc93/beatvortex and Nexus-Mods/vortex-games so thanks respective authors
- *
- * @param api - The extension API.
- * @param files - The list of mod files for installation
- * @param gameId - The game ID for installation (should only ever be GAME_ID)
- * @param progressDelegate - Delegate for reporting progress (not currently used)
- *
- * @returns Install instructions for mapping mod files to output location.
- */
-/* async function installContent(api: IExtensionApi, files: string[], destinationPath: string, gameId: string, progress: ProgressDelegate): Promise<IInstallResult> {
-    log('debug', `running wingvortex installer. [${gameId}]`, { files, destinationPath });
-    var enableAdvanced = Features.isInstallerEnabled(api.getState());
-    if (!enableAdvanced) {
-        return unreal.installContent(files, destinationPath, gameId, progress);
-    } else {
-        return advancedInstall(api, files, destinationPath, gameId, progress);
-    }
-} */
 
 module.exports = {
     default: main,

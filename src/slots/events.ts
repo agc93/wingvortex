@@ -2,6 +2,8 @@ import { IDeployedFile, IExtensionApi, IMod } from "vortex-api/lib/types/api";
 import { util, selectors, fs, actions, log } from "vortex-api";
 import { GAME_ID, ModList, MOD_FILE_EXT } from "..";
 import { SlotReader } from ".";
+import { QuickSlotReader } from "./bmsReader";
+import { ModBlueprints, AircraftSlot } from "./types";
 import path = require("path");
 import nfs = require('fs');
 
@@ -56,8 +58,8 @@ export function checkForConflicts(api: IExtensionApi, files: IDeployedFile[], co
                 {
                     title: 'See More',
                     action: (dismiss) => {
-                        api.showDialog('error', 'Potential DataTable mod conflict!', {
-                            text: "It looks like more than one of the mods that was just deployed are modifying the same data table! These mods can't be loaded together as they will overwrite each other, leading to unexpected results. The mods in question and what table they modify are shown below.\n\nYou should disable all but one of the conflicting mods before you launch the game.",
+                        api.showDialog('error', 'Potential blueprint mod conflict!', {
+                            text: "It looks like more than one of the mods that was just deployed are modifying the same data table! These mods can't be loaded together as they will overwrite each other, leading to unexpected results. The mods in question and what blueprint they modify are shown below.\n\nYou should disable all but one of the conflicting mods before you launch the game.",
                             options: {
                                 wrap: false
                             },
@@ -123,6 +125,7 @@ export function refreshSkins (api: IExtensionApi, instanceIds: string[], clobber
 export async function updateSlots(api: IExtensionApi, mods: IMod[], replace: boolean = true) {
     // log('debug', 'updating skin slots for mods', {mods: mods.length, replace});
     var reader = new SlotReader((m, d) => log('debug', m, d), MOD_FILE_EXT);
+    var bmsReader = new QuickSlotReader(api, (m, d) => log('debug', m, d), MOD_FILE_EXT);
     var installedMods = mods
         .filter(m => m !== undefined && m !== null && m)
         .filter(m => m.state == 'installed')
@@ -132,21 +135,40 @@ export async function updateSlots(api: IExtensionApi, mods: IMod[], replace: boo
         if (existingSkins !== undefined && !replace) {
             continue;
         }
-        const stagingPath: string = selectors.installPath(api.getState());
+        const stagingPath: string = selectors.installPathForGame(api.getState(), GAME_ID);
         var modPath = path.join(stagingPath, mod.installationPath);
         var files = (await nfs.promises.readdir(modPath, {withFileTypes: true}))
             .filter(de => de.isFile() && path.extname(de.name).toLowerCase() == MOD_FILE_EXT)
             .map(den => path.join(modPath, den.name));
         if (files) {
-            var slots = files
-                .map(fi => {
-                    var ident = reader.getSkinIdentifier(fi);
-                    if (ident) {
-                        return ident;
+            var skins: AircraftSlot[] = [];
+            var tables: string[] = [];
+            /* await files.reduce(async (accPromise, nextFile) => {
+                log('debug', `queuing ${nextFile}`);
+                var previous = await accPromise;
+                skins.push(...previous);
+                return bmsReader.getSkinIdentifier(nextFile);
+            }, Promise.resolve<AircraftSlot[]>([]));
+            var results = skins; */
+            for (const file of files) {
+                var result = await bmsReader.getModified(file);
+                skins.push(...result.skinSlots)
+                var modTables = result.blueprints
+                    .filter(fii => !!fii);
+                tables.push(...modTables);
+            }
+            var results = skins;
+            /* var results = await Promise.all(files
+                .map(async fi => {
+                    var test = await bmsReader.getSkinIdentifier(fi);
+                    log('info', 'got results from test fn', {test});
+                    // var ident = reader.getSkinIdentifier(fi);
+                    if (test && test.length > 0) {
+                        return test;
                     }
                     return null;
-                })
-                .filter(fii => fii)
+                })); */
+            var slots = results.filter(fii => !!fii)
                 .flatMap(i => i)
                 .map(i => `${i.aircraft}|${i.slot}`);
             if (slots) {
@@ -157,16 +179,21 @@ export async function updateSlots(api: IExtensionApi, mods: IMod[], replace: boo
                 // in future, we might want to show a dialog before doing this
                 api.store.dispatch(actions.setModAttribute(GAME_ID, mod.id, 'skinSlots', []));
             }
-            var tables = files
-                .map(fi => {
-                    var bp = reader.getModifiedDataTable(fi);
-                    if (bp && bp.includesDatatable) {
+            /* var tableResults = await Promise.all(files
+                .map(async fi => {
+                    var bp = await bmsReader.getModifiedTables(fi)
+                    if (bp && bp.length > 0) {
                         return bp;
                     }
                     return null;
-                })
-                .filter(fii => fii && fii.includesDatatable)
-                .flatMap(i => i.tableName);
+                })); */
+            /* var tTasks = files.reduce(async (accPromise, nextFile) => {
+                log('debug', `queuing ${nextFile}`);
+                await accPromise;
+                return bmsReader.getModifiedTables(nextFile);
+            }, Promise.resolve<string[]>([]));
+            var tableResults = await tTasks; */
+            // var tableResults = await eachPromise(files, f => bmsReader.getModifiedTables(f))
             if (tables) {
                 api.store.dispatch(actions.setModAttribute(GAME_ID, mod.id, 'datatables', tables));
             } else if (!tables && replace) {

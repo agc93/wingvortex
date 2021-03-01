@@ -1,7 +1,8 @@
 import { IExtensionApi } from "vortex-api/lib/types/api";
 import * as nfs from "fs";
 import path from "path";
-import { ModBlueprints, ModRecords } from "./types";
+import { AircraftSlot, ModBlueprints, ModRecords } from "./types";
+
 
 type ListOperationResult = {
     filePath: string;
@@ -15,6 +16,7 @@ export class QuickSlotReader {
     private _api: IExtensionApi;
     private _blueprintsPath: string = 'Content/ProjectWingman/Blueprints/';
     private _assetsPath: string = 'Assets/Objects/Aircraft/'
+    private _overrides: ((match: AircraftSlot) => boolean)[]
     /**
      *
      */
@@ -22,6 +24,19 @@ export class QuickSlotReader {
         this._logFn = logFn ?? ((m, obj) => {});
         this._modFileExt = modFileExt;
         this._api = api;
+        this._overrides = [
+            (name) => {
+                if (name.aircraft.includes('_')) {
+                    var lastPart = name.aircraft.split('_').slice(-1)[0];
+                    return !(hasLowerCase(lastPart) && hasUpperCase(lastPart));
+                } else {
+                    return true;
+                }
+            },
+            (name) => {
+                return !(name.aircraft == 'F18E' && name.slot == 'V2')
+            }
+        ];
     }
 
     private listOperation = async (filePath: string): Promise<ListOperationResult[]> => {
@@ -30,6 +45,7 @@ export class QuickSlotReader {
                 bmsScriptPath: path.join(__dirname, 'pw-unpack.bms'),
                 archivePath: filePath,
                 operationPath: path.join(__dirname, 'opPath'),
+                quiet: true,
                 qbmsOptions: {wildCards: ['{}']},
                 callback: (err: any, data: any) => {
                   if (err !== undefined) {
@@ -40,7 +56,6 @@ export class QuickSlotReader {
                 }
               });
         });
-        debugger;
         this._logFn('completed list operation', {result, time: Date.now});
         return result;
     }
@@ -104,11 +119,18 @@ export class QuickSlotReader {
         while ( (matches = pattern.exec(rawString)) !== null && (forcePathName ? rawString.includes('Aircraft') : true)) {
             this._logFn('identified aircraft skin', {matches});
             var [, aircraft, slot] = matches;
-            if (slot) {
-                // results.push({aircraft, slot, skinType: skinType.charAt(0).toUpperCase() + skinType.substr(1)});
+            if (slot && this._overrides.map(o => o({aircraft, slot})).every(o => o)) {
                 results.push({aircraft, slot});
             }
         }
         return results;
     }
+}
+
+function hasLowerCase(str: string) {
+    return str.toUpperCase() != str;
+}
+
+function hasUpperCase(str: string) {
+    return str.toLowerCase() != str;
 }

@@ -135,7 +135,7 @@ export async function updateSlots(api: IExtensionApi, mods: IMod[], replace: boo
         if (existingSkins !== undefined && !replace) {
             continue;
         }
-        const stagingPath: string = selectors.installPath(api.getState());
+        const stagingPath: string = selectors.installPathForGame(api.getState(), GAME_ID);
         var modPath = path.join(stagingPath, mod.installationPath);
         var files = (await nfs.promises.readdir(modPath, {withFileTypes: true}))
             .filter(de => de.isFile() && path.extname(de.name).toLowerCase() == MOD_FILE_EXT)

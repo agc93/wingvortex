@@ -61,35 +61,45 @@ export class QuickSlotReader {
     }
 
     getModified = async (filePath: string): Promise<ModRecords> => {
+        console.time('getModified:qbms');
         var skins: {aircraft: string, slot: string, skinType?: string}[] = [];
         var record: ModRecords = {blueprints: [], skinSlots: []};
         var tables: string[] = [];
         if (nfs.existsSync(filePath) && path.extname(filePath).toLowerCase() == this._modFileExt) {
             var result = await this.listOperation(filePath);
-            result = result.filter(f => !!f && f?.filePath);
-            var assets = result.filter(f => !!f?.filePath).filter(f => f.filePath.indexOf(this._assetsPath) !== -1);
-            for (const file of assets) {
-                var match = this.parseMatchString(file.filePath);
-                if (match !== undefined && match.length > 0) {
-                    skins.push(...match);
+            if (result && result.filter) {
+                result = result.filter(f => !!f && f?.filePath);
+                var assets = result.filter(f => !!f?.filePath).filter(f => f.filePath.indexOf(this._assetsPath) !== -1);
+                for (const file of assets) {
+                    var match = this.parseMatchString(file.filePath);
+                    if (match !== undefined && match.length > 0) {
+                        skins.push(...match);
+                    }
                 }
-            }
-            var looseFiles = result.filter(f => path.dirname(f.filePath) === '.');
-            for (const looseFile of looseFiles) {
-                var match = this.parseMatchString(looseFile.filePath, false);
-                if (match !== undefined && match.length > 0) {
-                    skins.push(...match);
-                } else if (path.basename(looseFile.filePath, path.extname(looseFile.filePath)).indexOf("DB") !== -1) {
-                    var tableName = path.basename(looseFile.filePath, path.extname(looseFile.filePath));
+                var looseFiles = result.filter(f => path.dirname(f.filePath) === '.');
+                for (const looseFile of looseFiles) {
+                    var match = this.parseMatchString(looseFile.filePath, false);
+                    if (match !== undefined && match.length > 0) {
+                        skins.push(...match);
+                    } else if (path.basename(looseFile.filePath, path.extname(looseFile.filePath)).indexOf("DB") !== -1) {
+                        var tableName = path.basename(looseFile.filePath, path.extname(looseFile.filePath));
+                        tables.push(tableName);
+                    }
+                }
+                var blueprints = result
+                    .filter(f => !!f?.filePath)
+                    .filter(f => (f.filePath.indexOf(this._blueprintsPath) !== -1) && (path.extname(f.filePath) == ".uexp" || path.extname(f.filePath) == ".uasset"));
+                for (const file of blueprints) {
+                    var tableName = path.basename(file.filePath, path.extname(file.filePath));
                     tables.push(tableName);
                 }
-            }
-            var blueprints = result
-                .filter(f => !!f?.filePath)
-                .filter(f => (f.filePath.indexOf(this._blueprintsPath) !== -1) && (path.extname(f.filePath) == ".uexp" || path.extname(f.filePath) == ".uasset"));
-            for (const file of blueprints) {
-                var tableName = path.basename(file.filePath, path.extname(file.filePath));
-                tables.push(tableName);
+            } else {
+                this._api.sendNotification({
+                    type: 'warning',
+                    title: 'Failed to read mod contents',
+                    message: "WingVortex failed to detect the contents of files in this mod. Included skins might not be shown.",
+                    displayMS: 5000
+                });
             }
         }
         if (skins.length == 0) {
@@ -100,7 +110,7 @@ export class QuickSlotReader {
         }
         record.skinSlots = skins.length > 0 ? skins.filter(onlyUnique) : [];
         record.blueprints = [...new Set(tables)];
-        // record.blueprints = tables;
+        console.timeEnd('getModified:qbms');
         return record;
     }
 
@@ -111,7 +121,7 @@ export class QuickSlotReader {
         };
         var results = [];
         var pattern = new RegExp(/(?:T_)?([a-zA-Z0-9_]+)_([a-zA-Z0-9]*\d+)(?:[^\w\d]){1}(?=u[^e])/g);
-        var matches;
+        var matches: RegExpExecArray | [any, any, any];
         var fileName = path.basename(rawString, path.extname(rawString));
         if (specialCaseNames[fileName] !== undefined) {
             return [specialCaseNames[fileName]];

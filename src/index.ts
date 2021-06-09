@@ -11,6 +11,7 @@ import { update010, migrate010 } from "./migrations";
 import { isActiveGame, UnrealGameHelper } from "vortex-ext-common";
 import { EventHandler } from "vortex-ext-common/events";
 import { migrationHandler } from "vortex-ext-common/migrations";
+import { LoadOrderHelper } from "vortex-ext-common/ueLoadOrder";
 import * as path from 'path';
 
 export const GAME_ID = 'projectwingman'
@@ -42,6 +43,10 @@ function main(context: IExtensionContext) {
     context.registerReducer(['settings', 'wingvortex'], settingsReducer);
     var evt = new EventHandler(context.api, GAME_ID);
     var installer = getInstaller();
+    var lo = new LoadOrderHelper(context.api, GAME_ID);
+    lo.withFilter((val, mod) => {
+        return mod ? mod.type == '' : false; //only include default mod types
+    });
     context.once(() => {
         log('debug', 'initialising your new extension!');
         try {
@@ -65,7 +70,7 @@ function main(context: IExtensionContext) {
     });
     context.registerGame({
         name: "Project Wingman",
-        mergeMods: true,
+        mergeMods: lo.createPrefix,
         logo: 'gameart.png',
         supportedTools: [],
         executable: () => 'ProjectWingman.exe',
@@ -95,6 +100,13 @@ function main(context: IExtensionContext) {
         installer.testSupported,
         installer.advancedInstall
     );
+    context.registerLoadOrder({
+        deserializeLoadOrder: lo.deserialize,
+        serializeLoadOrder: lo.serialize,
+        gameId: GAME_ID,
+        validate: lo.validate,
+        toggleableEntries: false
+    });
     /* context.registerInstaller(
         'pw-pakmods',
         25,

@@ -1,7 +1,7 @@
 import { IDeployedFile, IExtensionApi, IMod } from "vortex-api/lib/types/api";
 import { util, selectors, fs, actions, log } from "vortex-api";
 import { GAME_ID, ModList, MOD_FILE_EXT } from "..";
-import { SlotReader } from ".";
+import { NativeSlotReader } from "./pakReader";
 import { QuickSlotReader } from "./bmsReader";
 import { ModBlueprints, AircraftSlot } from "./types";
 import path = require("path");
@@ -124,8 +124,8 @@ export function refreshSkins (api: IExtensionApi, instanceIds: string[], clobber
 
 export async function updateSlots(api: IExtensionApi, mods: IMod[], replace: boolean = true) {
     // log('debug', 'updating skin slots for mods', {mods: mods.length, replace});
-    var reader = new SlotReader((m, d) => log('debug', m, d), MOD_FILE_EXT);
-    var bmsReader = new QuickSlotReader(api, (m, d) => log('debug', m, d), MOD_FILE_EXT);
+    var reader = new NativeSlotReader(api, (m, d) => log('debug', m, d), MOD_FILE_EXT);
+    //var bmsReader = new QuickSlotReader(api, (m, d) => log('debug', m, d), MOD_FILE_EXT);
     var installedMods = mods
         .filter(m => m !== undefined && m !== null && m)
         .filter(m => m.state == 'installed')
@@ -143,31 +143,14 @@ export async function updateSlots(api: IExtensionApi, mods: IMod[], replace: boo
         if (files) {
             var skins: AircraftSlot[] = [];
             var tables: string[] = [];
-            /* await files.reduce(async (accPromise, nextFile) => {
-                log('debug', `queuing ${nextFile}`);
-                var previous = await accPromise;
-                skins.push(...previous);
-                return bmsReader.getSkinIdentifier(nextFile);
-            }, Promise.resolve<AircraftSlot[]>([]));
-            var results = skins; */
             for (const file of files) {
-                var result = await bmsReader.getModified(file);
+                var result = await reader.getModified(file);
                 skins.push(...result.skinSlots)
                 var modTables = result.blueprints
                     .filter(fii => !!fii);
                 tables.push(...modTables);
             }
             var results = skins;
-            /* var results = await Promise.all(files
-                .map(async fi => {
-                    var test = await bmsReader.getSkinIdentifier(fi);
-                    log('info', 'got results from test fn', {test});
-                    // var ident = reader.getSkinIdentifier(fi);
-                    if (test && test.length > 0) {
-                        return test;
-                    }
-                    return null;
-                })); */
             var slots = results.filter(fii => !!fii)
                 .flatMap(i => i)
                 .map(i => `${i.aircraft}|${i.slot}`);
@@ -179,21 +162,6 @@ export async function updateSlots(api: IExtensionApi, mods: IMod[], replace: boo
                 // in future, we might want to show a dialog before doing this
                 api.store.dispatch(actions.setModAttribute(GAME_ID, mod.id, 'skinSlots', []));
             }
-            /* var tableResults = await Promise.all(files
-                .map(async fi => {
-                    var bp = await bmsReader.getModifiedTables(fi)
-                    if (bp && bp.length > 0) {
-                        return bp;
-                    }
-                    return null;
-                })); */
-            /* var tTasks = files.reduce(async (accPromise, nextFile) => {
-                log('debug', `queuing ${nextFile}`);
-                await accPromise;
-                return bmsReader.getModifiedTables(nextFile);
-            }, Promise.resolve<string[]>([]));
-            var tableResults = await tTasks; */
-            // var tableResults = await eachPromise(files, f => bmsReader.getModifiedTables(f))
             if (tables) {
                 api.store.dispatch(actions.setModAttribute(GAME_ID, mod.id, 'datatables', tables));
             } else if (!tables && replace) {

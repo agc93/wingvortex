@@ -5,7 +5,8 @@
   "main": "./dist/index.js",
   "scripts": {
     "webpack": "node ./node_modules/webpack/bin/webpack --config webpack.config.js --display-error-details --progress --profile --color",
-    "build": "npm run webpack && extractInfo && copyfiles -f ./src/**/*.svg ./src/**/*.bms ./gameart.png ./dist/"
+    "build": "npm run webpack && extractInfo && copyfiles -f ./src/**/*.svg ./src/**/*.bms ./gameart.png ./dist/",
+    "build:remote": "npm run build && copyfiles -f ./dist/**.* P:/game-projectwingman/"
   },
   "config": {
     "game": "Project Wingman",

@@ -6,7 +6,7 @@ import { getInstaller } from "./install";
 import { installedFilesRenderer, skinsAttribute } from "./attributes";
 import { checkForConflicts, refreshSkins, updateSlots } from "./slots";
 import { getLoadOrderHandler } from "./loadOrder";
-import { update010, migrate010 } from "./migrations";
+import { update010, migrate010, update020, migrate020 } from "./migrations";
 
 import { isActiveGame, UnrealGameHelper } from "vortex-ext-common";
 import { EventHandler } from "vortex-ext-common/events";
@@ -133,6 +133,7 @@ function main(context: IExtensionContext) {
     context.registerAction('mods-multirow-actions', 201, 'aircraft', {},
                          'Refresh Skins', (ids) => refreshSkins(context.api, ids), () => isActiveGame(context.api, GAME_ID));
     context.registerMigration(migrationHandler(context.api, GAME_ID, update010, migrate010));
+    context.registerMigration(migrationHandler(context.api, GAME_ID, update020, migrate020));
     // context.registerLoadOrder(getLoadOrderHandler(context.api));
     /* context.registerLoadOrderPage({
         gameId: GAME_ID,

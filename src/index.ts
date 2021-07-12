@@ -1,18 +1,27 @@
-import { fs, log, util } from "vortex-api";
-import { IDeployedFile, IDiscoveryResult, IExtensionApi, IExtensionContext, IGameStoreEntry, IInstallResult, IMod, IModTable, ISupportedResult, ProgressDelegate } from 'vortex-api/lib/types/api';
-import { isGameManaged, UserPaths } from "./util";
+import {fs, log, selectors, util} from "vortex-api";
+import {
+    IDiscoveryResult,
+    IExtensionApi,
+    IExtensionContext,
+    IGameStoreEntry,
+    IMod,
+    IState,
+} from 'vortex-api/lib/types/api';
+
+import {IIntegrationProps, isGameManaged, isToolMod, UserPaths} from "./util";
 import { Features, GeneralSettings, settingsReducer } from "./settings";
 import { getInstaller } from "./install";
 import { installedFilesRenderer, skinsAttribute } from "./attributes";
 import { checkForConflicts, refreshSkins, updateSlots } from "./slots";
-import { getLoadOrderHandler } from "./loadOrder";
-import { update010, migrate010, update020, migrate020 } from "./migrations";
+import { update010, migrate010, update020, getUpdateInfo, notesMigration } from "./migrations";
+import {getMergePath, isSicarioMod, sicarioDeploymentHandler, SicarioSettings, toggleIntegration, sicarioIntegrationTest, PSMTool} from "./sicario";
 
-import { isActiveGame, UnrealGameHelper } from "vortex-ext-common";
+import {getGamePath, isActiveGame, UnrealGameHelper} from "vortex-ext-common";
 import { EventHandler } from "vortex-ext-common/events";
 import { migrationHandler } from "vortex-ext-common/migrations";
 import { LoadOrderHelper } from "vortex-ext-common/ueLoadOrder";
 import * as path from 'path';
+
 
 export const GAME_ID = 'projectwingman'
 export const I18N_NAMESPACE = 'wingvortex';
@@ -38,8 +47,27 @@ function main(context: IExtensionContext) {
     const isWingmanManaged = (): boolean => {
         return isGameManaged(context.api);
     }
+
+    const getIntegrationProps = (state: IState): IIntegrationProps => {
+        const gameMode = selectors.activeGameId(state);
+        return {
+            gameMode,
+            enabled: Features.isSicarioEnabled(state)
+        };
+    }
     
     context.registerSettings('Interface', GeneralSettings, undefined, isWingmanManaged, 101);
+    context.registerSettings('Interface', SicarioSettings, undefined, isWingmanManaged, 102);
+    context.registerToDo(
+        'sicario-integration',
+        'settings',
+        getIntegrationProps,
+        'sicario-alt',
+        'Project Sicario Integration',
+        (props: IIntegrationProps) => toggleIntegration(context.api),
+        (props: IIntegrationProps) => isWingmanManaged(),
+        (t, props: IIntegrationProps) => (props.enabled ? t('Yes') : t('No')),
+        undefined);
     context.registerReducer(['settings', 'wingvortex'], settingsReducer);
     var evt = new EventHandler(context.api, GAME_ID);
     var installer = getInstaller();
@@ -59,6 +87,7 @@ function main(context: IExtensionContext) {
         util.installIconSet('wingvortex', path.join(__dirname, 'icons.svg'));
         
         evt.didDeploy(async (_, deployment) => checkForConflicts(context.api, Object.values(deployment).flat()), {name: 'Skin slot detection'});
+        evt.didDeploy(sicarioDeploymentHandler(context.api), {name: 'Project Sicario Integration'});
         context.api.onStateChange(
             ['persistent', 'mods', GAME_ID],
             evt.onGameModsChanged(async (current, changes) => {
@@ -72,7 +101,7 @@ function main(context: IExtensionContext) {
         name: "Project Wingman",
         mergeMods: lo.createPrefix,
         logo: 'gameart.png',
-        supportedTools: [],
+        supportedTools: [PSMTool],
         executable: () => 'ProjectWingman.exe',
         requiredFiles: [
             'ProjectWingman.exe'
@@ -94,6 +123,31 @@ function main(context: IExtensionContext) {
             appDataPath: () => UserPaths.userDataPath()
         }
     });
+    //special mod type for Sicario merged patches, mostly so that the path can be tweaked and it won't show in the LO
+    context.registerModType(
+        'sicario-merge',
+        10,
+        gameId => gameId === GAME_ID,
+        (game) => getMergePath(game, context.api.getState()),
+        (inst) => isSicarioMod(inst),
+        {
+            name: "PSM Merge Data",
+            mergeMods: true,
+            deploymentEssential: false
+        });
+    //this adds a new mod type just so that tools (like Sicario) go into the root directory instead
+    context.registerModType(
+        'sicario-tools',
+        10,
+        gameId => gameId === GAME_ID,
+        (game) => getGamePath(game, context.api.getState(), true),
+        (inst) => isToolMod(inst),
+        {
+            name: "PW Modding Tool",
+            mergeMods: true
+        }
+    );
+    context.registerTest('sicario-integration', 'gamemode-activated', () => sicarioIntegrationTest(context.api)());
     context.registerInstaller(
         'pw-pakmods-advanced',
         25,
@@ -133,17 +187,8 @@ function main(context: IExtensionContext) {
     context.registerAction('mods-multirow-actions', 201, 'aircraft', {},
                          'Refresh Skins', (ids) => refreshSkins(context.api, ids), () => isActiveGame(context.api, GAME_ID));
     context.registerMigration(migrationHandler(context.api, GAME_ID, update010, migrate010));
-    context.registerMigration(migrationHandler(context.api, GAME_ID, update020, migrate020));
-    // context.registerLoadOrder(getLoadOrderHandler(context.api));
-    /* context.registerLoadOrderPage({
-        gameId: GAME_ID,
-        gameArtURL: `${__dirname}\\gameart.png`,
-        preSort: (items, direction) => preSort(context.api, items, direction),
-        filter: filterLoadOrderEnabled,
-        displayCheckboxes: false,
-        callback: (loadOrder, type) => loadOrderChanged(context.api, loadOrder, type),
-        createInfoPanel: (props) => loadOrderInfoRenderer(context.api, props)
-    }); */
+    context.registerMigration(migrationHandler(context.api, GAME_ID, update020, notesMigration));
+    context.registerMigration(migrationHandler(context.api, GAME_ID, getUpdateInfo('0.2.1'), notesMigration));
     return true;
 }
 

@@ -65,3 +65,14 @@ function getSaveGamePath(saveGameFile?: string) {
         return saveGameDir
 	}
 }
+
+export const isToolMod = async (instructions: IInstruction[]): Promise<boolean> => {
+	let exeSources = instructions.filter(f => f.type == "copy" && path.extname(f.source).toLowerCase() == '.exe');
+	let pakSources = instructions.filter(f => f.type == "copy" && path.extname(f.source).toLowerCase() == '.pak');
+	return exeSources.length > 0 && pakSources.length == 0;
+}
+
+export interface IIntegrationProps {
+	gameMode: string;
+	enabled: boolean;
+}

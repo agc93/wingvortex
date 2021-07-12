@@ -65,7 +65,7 @@ function main(context: IExtensionContext) {
         'sicario-alt',
         'Project Sicario Integration',
         (props: IIntegrationProps) => toggleIntegration(context.api),
-        (props: IIntegrationProps) => isWingmanManaged(),
+        (props: IIntegrationProps) => isWingmanManaged() && props.gameMode == GAME_ID,
         (t, props: IIntegrationProps) => (props.enabled ? t('Yes') : t('No')),
         undefined);
     context.registerReducer(['settings', 'wingvortex'], settingsReducer);

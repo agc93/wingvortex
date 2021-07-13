@@ -14,7 +14,7 @@ import { getInstaller } from "./install";
 import { installedFilesRenderer, skinsAttribute } from "./attributes";
 import { checkForConflicts, refreshSkins, updateSlots } from "./slots";
 import { update010, migrate010, update020, getUpdateInfo, notesMigration } from "./migrations";
-import {getMergePath, isSicarioMod, sicarioDeploymentHandler, SicarioSettings, toggleIntegration, sicarioIntegrationTest, PSMTool} from "./sicario";
+import {getMergePath, isSicarioMerge, sicarioDeploymentHandler, SicarioSettings, toggleIntegration, sicarioIntegrationTest, PSMTool, runSicarioMerge} from "./sicario";
 
 import {getGamePath, isActiveGame, UnrealGameHelper} from "vortex-ext-common";
 import { EventHandler } from "vortex-ext-common/events";
@@ -87,7 +87,7 @@ function main(context: IExtensionContext) {
         util.installIconSet('wingvortex', path.join(__dirname, 'icons.svg'));
         
         evt.didDeploy(async (_, deployment) => checkForConflicts(context.api, Object.values(deployment).flat()), {name: 'Skin slot detection'});
-        evt.didDeploy(sicarioDeploymentHandler(context.api), {name: 'Project Sicario Integration'});
+        evt.didDeploy(async (profileId, deployment, setTitle) => runSicarioMerge(context.api, profileId, deployment, setTitle), {name: 'Project Sicario Integration'});
         context.api.onStateChange(
             ['persistent', 'mods', GAME_ID],
             evt.onGameModsChanged(async (current, changes) => {
@@ -129,7 +129,7 @@ function main(context: IExtensionContext) {
         10,
         gameId => gameId === GAME_ID,
         (game) => getMergePath(game, context.api.getState()),
-        (inst) => isSicarioMod(inst),
+        isSicarioMerge,
         {
             name: "PSM Merge Data",
             mergeMods: true,

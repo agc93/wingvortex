@@ -36,7 +36,7 @@ export class NativeSlotReader {
     private listOperation = async (filePath: string): Promise<IIndexRecord[]> => {
         var reader = new PakFileReader(filePath, {safeMode: true});
         var result = await reader.parse();
-        this._logFn('completed list operation', {result, time: Date.now});
+        this._logFn('completed list operation', {hash: result.indexHash});
         if (result && result.archiveVersion === 3 && (result.index?.recordCount ??0) > 0) {
             var mountSegs = result.index.mountPoint.split(/[/\\]/).filter(s => /[a-z0-9]+/i.test(s));
             return mountSegs.length > 0
@@ -50,6 +50,14 @@ export class NativeSlotReader {
             return null;
         }
         
+    }
+
+    getAllFiles = async (filePath: string): Promise<string[]> => {
+        if (nfs.existsSync(filePath) && path.extname(filePath).toLowerCase() == this._modFileExt) {
+            var result = await this.listOperation(filePath);
+            return result.map(r => r.fileName);
+        }
+        return undefined;
     }
 
     getModified = async (filePath: string): Promise<ModRecords> => {

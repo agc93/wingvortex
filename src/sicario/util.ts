@@ -46,6 +46,7 @@ export const PSMTool: ITool = {
     name: 'Project Sicario Merger',
     shortName: 'PSM',
     logo: 'psm.png',
+    shell: true,
     executable: () => 'ProjectSicario.exe',
     requiredFiles: [
         'ProjectSicario.exe',

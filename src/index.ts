@@ -121,7 +121,8 @@ function main(context: IExtensionContext) {
             steamAppId: STEAMAPP_ID,
             settingsPath: () => UserPaths.userConfigPath(),
             appDataPath: () => UserPaths.userDataPath()
-        }
+        },
+        onStart: 'hide'
     });
     //special mod type for Sicario merged patches, mostly so that the path can be tweaked and it won't show in the LO
     context.registerModType(

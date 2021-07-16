@@ -84,21 +84,22 @@ function renderConflictList(conflicts: SlotList, prefix: string = 'Slot'): strin
 
 function buildConflictList(mods: IMod[], attributeName: string): SlotList {
     var slots: {[key: string]: IMod[]} = {};
-    var allSlots = mods.reduce(function (slots, mod) {
-
-        var skins = util.getSafe<string[]>(mod.attributes, [attributeName], []);
-        if (skins) {
-            skins.forEach(sk => {
-                // If the key doesn't exist yet, create it
-                if (!slots.hasOwnProperty(sk)) {
-                    slots[sk] = [];
-                }
-                slots[sk].push(mod);
-            });
-        }
-		// Return the object to the next item in the loop
-		return slots;
-    }, slots);
+    var allSlots = mods
+        // .filter(m => m.type !== 'sicario-merge') //theoretically not needed since updateSlots ignores these anyway
+        .reduce(function (slots, mod) {
+            var skins = util.getSafe<string[]>(mod.attributes, [attributeName], []);
+            if (skins) {
+                skins.forEach(sk => {
+                    // If the key doesn't exist yet, create it
+                    if (!slots.hasOwnProperty(sk)) {
+                        slots[sk] = [];
+                    }
+                    slots[sk].push(mod);
+                });
+            }
+            // Return the object to the next item in the loop
+            return slots;
+        }, slots);
     return allSlots;
     // return removeNonConflicts(allSlots);
 }

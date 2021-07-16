@@ -59,7 +59,7 @@ export function checkForConflicts(api: IExtensionApi, files: IDeployedFile[], co
                     title: 'See More',
                     action: (dismiss) => {
                         api.showDialog('error', 'Potential blueprint mod conflict!', {
-                            text: "It looks like more than one of the mods that was just deployed are modifying the same data table! These mods can't be loaded together as they will overwrite each other, leading to unexpected results. The mods in question and what blueprint they modify are shown below.\n\nYou should disable all but one of the conflicting mods before you launch the game.",
+                            text: "It looks like more than one of the mods that was just deployed are modifying the same data table! These mods can't be loaded together as they will overwrite each other, leading to unexpected results. The mods in question and what blueprint they modify are shown below.\n\nYou should either use a merged mod or disable all but one of the conflicting mods before you launch the game.",
                             options: {
                                 wrap: false
                             },
@@ -129,6 +129,7 @@ export async function updateSlots(api: IExtensionApi, mods: IMod[], replace: boo
     var installedMods = mods
         .filter(m => m !== undefined && m !== null && m)
         .filter(m => m.state == 'installed')
+        .filter(m => m.type !== 'sicario-merge') //ignore merged files
         .filter(m => m.installationPath);
     for (const mod of installedMods) {
         var existingSkins = util.getSafe(mod.attributes, ['skinSlots'], undefined);

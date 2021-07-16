@@ -11,6 +11,9 @@ export const enableAdvancedInstaller =
 export const enableInstallReadmes =
     createAction('PW_INSTALL_READMES', (enable: boolean) => enable);
 
+export const enableSicarioIntegration =
+    createAction('PW_ENABLE_SICARIO', (enable: boolean) => enable);
+
 
 /**
  * reducer for extension settings
@@ -23,10 +26,14 @@ export const settingsReducer: IReducerSpec = {
         [enableInstallReadmes as any]: (state, payload: boolean) => {
             return util.setSafe(state, ['installReadme'], payload);
         },
+        [enableSicarioIntegration as any]: (state, payload: boolean) => {
+            return util.setSafe(state, ['sicarioIntegration'], payload);
+        }
     },
     defaults: {
         installer: true,
-        installReadme: true
+        installReadme: true,
+        sicarioIntegration: false
     }
 };
 
@@ -36,5 +43,8 @@ export const Features = {
     },
     readmesEnabled: (state: IState): boolean => {
         return util.getSafe(state.settings, ['wingvortex', 'installReadme'], true);
+    },
+    isSicarioEnabled: (state: IState): boolean => {
+        return util.getSafe(state.settings, ['wingvortex', 'sicarioIntegration'], true);
     }
 }

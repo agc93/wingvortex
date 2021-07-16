@@ -33,7 +33,7 @@ export const sicarioIntegrationTest = (api: IExtensionApi): () => Promise<ITestR
 const toolMissing: ITestResult = {
     description: {
         short: 'Project Sicario Merger not installed',
-        long: `You have configured Vortex to run PSM automatically but it\'s not installed. For the automation to work, PSM needs to be installed and configured. You can download it from [url]https://www.nexusmods.com/projectwingman/mods/270[/url].`,
+        long: `You have configured Vortex to run PSM automatically but it\'s not installed (or deployed). \n\n\nFor the automation to work, PSM needs to be installed and configured. You can download it from [url]https://www.nexusmods.com/projectwingman/mods/270[/url]. If you have PSM installed with Vortex, make sure it's enabled and you have deployed your mods, then Check Again.`,
     },
     severity: "warning"
 }

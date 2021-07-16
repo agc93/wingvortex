@@ -16,6 +16,7 @@ export const getMergePath = (game: IGame, state: IState): string => {
 export const isSicarioMerge = async (instructions: IInstruction[]): Promise<boolean> => {
     let pakSources = instructions.filter(f => f.type == "copy" && path.extname(f.source) == '.pak');
     //this should also check that the destination is ~sicario, but that's for later
+    // also might want to tweak this to account for the report?
     return pakSources.length > 0 && pakSources.every(p => path.basename(p.source, path.extname(p.source)) == MergedFileName);
 }
 

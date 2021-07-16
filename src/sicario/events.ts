@@ -104,7 +104,7 @@ export const runMerger = async (api: IExtensionApi, profile: IProfile): Promise<
     const installPath = selectors.installPathForGame(state, profile.gameId);
     const modId = await ensureMergeDataMod(api, profile);
     const modPath = path.join(installPath, modId)
-    const args = ['build', `--installPath="${gamePath}"`, `--outputPath="${modPath}"`];
+    const args = ['build', `--installPath="${gamePath}"`, `--outputPath="${modPath}"`, `--report="mergeReport.json"`];
     await api.runExecutable(tool.path, args, { suggestDeploy: false });
 }
 

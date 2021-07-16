@@ -1,4 +1,35 @@
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>WingVortex – WingVortex</title><link>/</link><description>Recent content on WingVortex</description><generator>Hugo -- gohugo.io</generator><atom:link href="/index.xml" rel="self" type="application/rss+xml"/><item><title>Blog: Alpha 1 Release</title><link>/blog/2021/03/02/alpha-1-release/</link><pubDate>Tue, 02 Mar 2021 00:00:00 +0000</pubDate><guid>/blog/2021/03/02/alpha-1-release/</guid><description>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>WingVortex – WingVortex</title><link>/</link><description>Recent content on WingVortex</description><generator>Hugo -- gohugo.io</generator><atom:link href="/index.xml" rel="self" type="application/rss+xml"/><item><title>Blog: Alpha 2 Release</title><link>/blog/2021/07/11/alpha-2-release/</link><pubDate>Sun, 11 Jul 2021 00:00:00 +0000</pubDate><guid>/blog/2021/07/11/alpha-2-release/</guid><description>
+&lt;div class="pageinfo pageinfo-primary">
+&lt;p>This release is now available &lt;a href="https://www.nexusmods.com/site/mods/189?tab=files">on Nexus Mods&lt;/a>.&lt;/p>
+&lt;/div>
+&lt;p>This release is the next alpha of the Project Wingman extension!&lt;/p>
+&lt;p>This one&amp;rsquo;s a big update, both in terms of functionality and under the hood. Note that since we&amp;rsquo;re using some of Vortex&amp;rsquo;s newer bells and whistles now, this version will require Vortex &lt;strong>1.4&lt;/strong> or higher. The previous 0.0.5 release will continue to be available for 1.3 users.&lt;/p>
+&lt;ul>
+&lt;li>Load order support!
+&lt;ul>
+&lt;li>You can now manage your mods load order directly in Vortex.&lt;/li>
+&lt;li>Arrange your mods in the Load Order tab and they will take effect when your mods are deployed.&lt;/li>
+&lt;li>Note this changes how the actual files are deployed in the install folder so don&amp;rsquo;t be alarmed.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>Dramatically improved skin and conflict detection (again)
+&lt;ul>
+&lt;li>While the older QuickBMS-based method worked well, it was &lt;em>slow&lt;/em>.&lt;/li>
+&lt;li>We&amp;rsquo;ve since migrated to a completely new self-contained PAK reader that runs entirely in-process.&lt;/li>
+&lt;li>This version should be just as reliable as before, but also run much, &lt;em>much&lt;/em> faster.&lt;/li>
+&lt;li>Most of these improvements also apply to more reliably picking up blueprint (aka data table) mods and conflicts&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>Fixed a lot of smaller bugs and problems
+&lt;ul>
+&lt;li>Most notably the missing icons should be back&lt;/li>
+&lt;li>This one has been a pretty massive change behind-the-scenes so please &lt;a href="https://github.com/agc93/wingvortex/issues">report any bugs&lt;/a> or &lt;a href="https://www.nexusmods.com/site/mods/189?tab=posts">give feedback&lt;/a>.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;h3 id="migration">Migration&lt;/h3>
+&lt;p>Since this release has changed a lot of things behind the scenes, the extension will actually run a short migration process when you first start Vortex after the upgrade. You shouldn&amp;rsquo;t really notice this, but it&amp;rsquo;s mostly just cleaning up a lot of the mess from earlier versions.&lt;/p>
+&lt;p>You should be able to install mods for Project Wingman from Nexus Mods or external archives in this release and support the basic Vortex features of install/enable/disable/deploy/purge.&lt;/p></description></item><item><title>Blog: Alpha 1 Release</title><link>/blog/2021/03/02/alpha-1-release/</link><pubDate>Tue, 02 Mar 2021 00:00:00 +0000</pubDate><guid>/blog/2021/03/02/alpha-1-release/</guid><description>
 &lt;div class="pageinfo pageinfo-primary">
 &lt;p>This release is now available &lt;a href="https://www.nexusmods.com/site/mods/189?tab=files">on Nexus Mods&lt;/a>.&lt;/p>
 &lt;/div>

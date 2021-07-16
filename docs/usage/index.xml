@@ -48,11 +48,25 @@ C:\Users\&amp;lt;your-user-name-here&amp;gt;\AppData\Roaming\Vortex\plugins\game
 &lt;p>If you&amp;rsquo;re installing mods from Nexus Mods, you can use the &amp;ldquo;Vortex&amp;rdquo; or &amp;ldquo;Download with Mod Manager&amp;rdquo; buttons on the mod page to automatically open Vortex and download the mod. Simply Install and Enable like usual and you should be good to go.&lt;/p>
 &lt;h3 id="installing-archives-with-multiple-mod-files">Installing archives with multiple mod files&lt;/h3>
 &lt;p>If you install a file from Nexus Mods that has multiple game mod files (i.e. &lt;code>.pak&lt;/code> files), you will see a prompt that should walk you through the process of choosing which mod files you want to install.&lt;/p>
+&lt;h3 id="installing-non-mod-files">Installing non-mod files&lt;/h3>
+&lt;p>If you install non-PAK mod files, such as modding tools or PSM presets, Vortex will still install them so you can manage them like any other mod but note that they might get &lt;em>deployed&lt;/em> into slightly different places in your installation&lt;/p>
 &lt;h2 id="install-from-archives">Install from archives&lt;/h2>
 &lt;p>You can also download mod archives directly from Nexus Mods or anywhere else you like and install them with Vortex. Simply use the &lt;em>Install From File&lt;/em> button in the toolbar or drop them onto the drop zone at the bottom of the Vortex window.&lt;/p>
 &lt;blockquote>
 &lt;p>Be aware that installing from non-Nexus archives will often not include the full metadata. You can double-click the mod in the mod list to change its details.&lt;/p>
-&lt;/blockquote></description></item><item><title>Docs: Advanced options and configuration</title><link>/docs/usage/advanced/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>/docs/usage/advanced/</guid><description>
+&lt;/blockquote></description></item><item><title>Docs: Managing your installed mods</title><link>/docs/usage/manage-mods/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>/docs/usage/manage-mods/</guid><description>
+&lt;p>Many mods won&amp;rsquo;t require much extra setup or configuration but some mods may need a little fine-tuning or extra options to work reliably.&lt;/p>
+&lt;p>If you haven&amp;rsquo;t already, open the Games screen and click the &lt;strong>Manage&lt;/strong> button on the Project Wingman icon under &lt;em>Unmanaged&lt;/em>, then install your mods as outlined in &lt;a href="../installation">the previous section&lt;/a>.&lt;/p>
+&lt;hr>
+&lt;h2 id="load-order">Load Order&lt;/h2>
+&lt;p>If you have multiple mods changing the same values or mods that depend on each other, you might need to tweak the order the game loads the mods. You can do that by opening the Load Order tab from the left panel and you will see a list of your enabled mods in the main view. Drag-and-drop your mods as needed to control the order you want them loaded and the next time your mods are deployed, Vortex will automatically arrange your files in the &lt;code>~mods&lt;/code> folder to ensure they load in the correct order.&lt;/p>
+&lt;blockquote>
+&lt;p>Note that (like all UE4 games), the &lt;em>last&lt;/em> mod to modify a resource &amp;ldquo;wins&amp;rdquo; so lower mods overwrite higher ones in the list.&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="conflict-detection">Conflict Detection&lt;/h2>
+&lt;p>To help with spotting where you have conflicting mods, WingVortex will automatically scan your installed mods to identify the most common sources of conflicts: aircraft skins and datatable mods (aka blueprint mods).&lt;/p>
+&lt;p>When your mods are deployed, if any of your enabled mods are replacing the same skin slots or the same data tables you will get a warning notification informing you of the conflict. The game will still load mods even if they are conflicting, so this is often your best bet for spotting mods that may not work together.&lt;/p>
+&lt;p>When Vortex warns you of a conflict, you can either disable some of the conflicting mods until there are no more conflicts, try your luck in-game anyway (&lt;em>not recommended&lt;/em>) or use the &lt;a href="../psm-integration">PSM Integration&lt;/a> to try and merge compatible mods.&lt;/p></description></item><item><title>Docs: Advanced options and configuration</title><link>/docs/usage/advanced/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>/docs/usage/advanced/</guid><description>
 &lt;h3 id="customising-metadata">Customising metadata&lt;/h3>
 &lt;p>You can customise the basic metadata of any of your mods (name, author, notes etc) using Vortex&amp;rsquo;s built-in sidebar. Just double-click on the name of any mod in your mod list and you&amp;rsquo;ll get a small dialog where you can change the name and author, or add some notes for yourself. It&amp;rsquo;s not recommended to change the source or mod type as these control how mods are handled internally.&lt;/p>
 &lt;h3 id="profiles">Profiles&lt;/h3>

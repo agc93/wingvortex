@@ -1,9 +1,10 @@
 import { IDeployedFile, IDiscoveryResult, IExtensionApi, IMod, IProfile, IState } from "vortex-api/lib/types/api";
 import { Features } from "../settings";
-import { GAME_ID } from "../index";
+import { GAME_ID, MOD_FILE_EXT } from "..";
 import { actions, fs, log, selectors, util } from "vortex-api";
 import { getSicarioTool, toolExists } from "./util";
 import * as path from "path";
+import * as nfs from "fs";
 import { NativeSlotReader } from "../slots/pakReader";
 import { getGamePath } from "vortex-ext-common";
 
@@ -57,7 +58,19 @@ export const runSicarioMerge = async (api: IExtensionApi, profileId: string, old
             else if (err instanceof util.SetupError) {
                 api.showErrorNotification('Failed to find PSM', 'Please install PSM and add it as a tool in Vortex', {allowReport: false});
             } else {
-                api.showErrorNotification('Failed to run PSM', 'There was an unknown error running PSM to merge your mods!', {allowReport: false});
+                var errDetail = 'There was an unknown error running PSM to merge your mods!';
+                if (err.exitCode) {
+                    switch (err.exitCode) {
+                        case 412:
+                            errDetail = "One of the presets or mods in your mods list is attempting to patch a non-existent file. Check your presets and mods for updates and try again.";
+                            break;
+                        case 422:
+                            errDetail = "One of the presets or mods in your mods list attempted to make an invalid change in a patch. This is a problem in the patch file itself, and PSM cannot correct for it."
+                        default:
+                            break;
+                    }
+                }
+                api.showErrorNotification('Failed to run PSM', errDetail, {allowReport: false});
             }
         }
     } else {
@@ -104,8 +117,8 @@ export const runMerger = async (api: IExtensionApi, profile: IProfile): Promise<
     const installPath = selectors.installPathForGame(state, profile.gameId);
     const modId = await ensureMergeDataMod(api, profile);
     const modPath = path.join(installPath, modId)
-    const args = ['build', `--installPath="${gamePath}"`, `--outputPath="${modPath}"`, `--report="mergeReport.json"`];
-    await api.runExecutable(tool.path, args, { suggestDeploy: false });
+    const args = ['build', `--non-interactive`, `--installPath="${gamePath}"`, `--outputPath="${modPath}"`, `--report="mergeReport.json"`];
+    await api.runExecutable(tool.path, args, { suggestDeploy: false, expectSuccess: true });
 }
 
 async function ensureMergeDataMod(api: IExtensionApi, profile: IProfile): Promise<string> {
@@ -151,4 +164,46 @@ async function createMergeDataMod(api: IExtensionApi, modName: string,
             resolve();
         });
     });
+}
+
+export async function updatePresetMods(api: IExtensionApi, mods: IMod[], replace: boolean = true) {
+    var reader = new NativeSlotReader(api, (m, d) => log('debug', m, d), MOD_FILE_EXT);
+    //var bmsReader = new QuickSlotReader(api, (m, d) => log('debug', m, d), MOD_FILE_EXT);
+    var installedMods = mods
+        .filter(m => m !== undefined && m !== null && m)
+        .filter(m => m.state == 'installed')
+        .filter(m => m.type !== 'sicario-merge') //ignore merged files
+        .filter(m => m.installationPath);
+    for (const mod of installedMods) {
+        var existingPresets = util.getSafe(mod.attributes, ['sicarioPresets'], undefined);
+        if (existingPresets !== undefined && !replace) {
+            continue;
+        }
+        const stagingPath: string = selectors.installPathForGame(api.getState(), GAME_ID);
+        var modPath = path.join(stagingPath, mod.installationPath);
+        var pakFiles = (await nfs.promises.readdir(modPath, {withFileTypes: true}))
+            .filter(de => de.isFile() && path.extname(de.name).toLowerCase() == MOD_FILE_EXT)
+            .map(den => path.join(modPath, den.name));
+        var preset: {embedded: boolean, loose: boolean} = {embedded: false, loose: false};
+        if (pakFiles) {
+            for (const file of pakFiles) {
+                var result = await reader.getAllFiles(file);
+                if (result.some(r => path.extname(r) == '.dtp')) {
+                    preset.embedded = true;
+                }
+            }
+        }
+        var presetFiles = (await nfs.promises.readdir(modPath, {withFileTypes: true}))
+            .filter(de => de.isFile() && path.extname(de.name).toLowerCase() == ".dtp")
+            .map(den => path.join(modPath, den.name));
+        if (presetFiles && presetFiles.length > 0) {
+            preset.loose = true;
+        }
+
+        var hasPreset = preset?.embedded || preset?.loose;
+
+        if (hasPreset || (!hasPreset && replace)) {
+            api.store.dispatch(actions.setModAttribute(GAME_ID, mod.id, 'sicarioPresets', preset));
+        }
+    }
 }

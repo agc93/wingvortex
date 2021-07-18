@@ -16,6 +16,7 @@ export function getInstaller(): AdvancedInstaller {
     var installer = builder
         .addExtender(addInstalledPaksAttribute(MOD_FILE_EXT))
         .addExtender(getReadmeInstructions, Features.readmesEnabled)
+        // .addExtender(getContainsPreset, Features.isSicarioEnabled)
         .addCompatibilityTest(unsupportedFileTest)
         .addSupportedCheck(async (files, gameId, state)=> {return {supported: Features.isInstallerEnabled(state), requiredFiles: []}})
         .build();
@@ -44,7 +45,7 @@ function getPaks(instructions: IInstruction[]): IInstruction[] {
     };
 }
 
-function getReadmeInstructions(instructions: IInstruction[], files: string[], modName: string): IInstruction[] {
+async function getReadmeInstructions(instructions: IInstruction[], files: string[], modName: string): Promise<IInstruction[]> {
     try {
         if (files.filter(f => path.extname(f) == '.txt').length == 1) {
             //we've got just one txt file, assume it's a README

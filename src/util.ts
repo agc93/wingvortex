@@ -76,3 +76,16 @@ export interface IIntegrationProps {
 	gameMode: string;
 	enabled: boolean;
 }
+
+export function toEventPromise<ResT>(func: (cb) => void): Promise<ResT> {
+	return new Promise((resolve, reject) => {
+		const cb = (out: ResT) => {
+			if ((out !== null) && (out !== undefined)) {
+			  return resolve(out);
+			} else {
+			  return reject(out);
+			}
+		  };
+		  func(cb);
+	})
+  }

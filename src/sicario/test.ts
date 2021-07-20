@@ -3,7 +3,7 @@ import {IExtensionApi} from "vortex-api/lib/types/api";
 import {Features} from "../settings";
 import {selectors, fs} from "vortex-api";
 import {GAME_ID} from "../index";
-import {getSicarioTool, toolExists} from "./util";
+import {getMergerPath, getSicarioTool, toolExists} from "./util";
 
 
 export const sicarioIntegrationTest = (api: IExtensionApi): () => Promise<ITestResult> => {
@@ -22,7 +22,7 @@ export const sicarioIntegrationTest = (api: IExtensionApi): () => Promise<ITestR
         let tool = getSicarioTool(state, gameMode);
 
         if (tool !== undefined) {
-            return (await toolExists(tool)) ? undefined : toolMissing;
+            return (await toolExists(tool)) ? undefined : (await getMergerPath(state, gameMode)) !== undefined ? undefined : toolMissing;
         }
         return undefined;
     }

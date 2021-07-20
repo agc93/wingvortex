@@ -2,11 +2,12 @@ import { IDeployedFile, IDiscoveryResult, IExtensionApi, IMod, IProfile, IState 
 import { Features } from "../settings";
 import { GAME_ID, MOD_FILE_EXT } from "..";
 import { actions, fs, log, selectors, util } from "vortex-api";
-import { getSicarioTool, toolExists } from "./util";
+import { getMergerPath, getSicarioTool, toolExists } from "./util";
 import * as path from "path";
 import * as nfs from "fs";
 import { NativeSlotReader } from "../slots/pakReader";
 import { getGamePath } from "vortex-ext-common";
+import { toEventPromise } from "../util";
 
 export const sicarioPreDeploymentHandler = (api: IExtensionApi): (profileId: string, deployment: { [modType: string]: IDeployedFile[] }) => Promise<void> => {
     const state = api.getState();
@@ -22,6 +23,13 @@ export const runSicarioMerge = async (api: IExtensionApi, profileId: string, old
     if (Features.isSicarioEnabled(state)) {
         setTitle?.("Updating PSM mod state");
         let profile = state.persistent.profiles[profileId];
+        try {
+            //kick this off now to give Vortex a chance to find the tools hopefully
+            // await util.toPromise(cb => api.events.emit('start-quick-discovery', cb));
+            await toEventPromise(cb => api.events.emit('start-quick-discovery', cb));
+        } catch {
+            //ignored
+        }
         if (profile === undefined || profile.gameId !== GAME_ID) {
             return;
         }
@@ -56,7 +64,7 @@ export const runSicarioMerge = async (api: IExtensionApi, profileId: string, old
                 //ignored
             }
             else if (err instanceof util.SetupError) {
-                api.showErrorNotification('Failed to find PSM', 'Please install PSM and add it as a tool in Vortex', {allowReport: false});
+                api.showErrorNotification('Failed to find PSM', 'Please install PSM and configure it as a tool in Vortex, or ensure that PSM is in the root of the game directory.', {allowReport: false});
             } else {
                 var errDetail = 'There was an unknown error running PSM to merge your mods!';
                 if (err.exitCode) {
@@ -70,7 +78,7 @@ export const runSicarioMerge = async (api: IExtensionApi, profileId: string, old
                             break;
                     }
                 }
-                api.showErrorNotification('Failed to run PSM', errDetail, {allowReport: false});
+                api.showErrorNotification('Failed to build merged mod', errDetail, {allowReport: false});
             }
         }
     } else {
@@ -108,17 +116,19 @@ function dataModName(profileName: string): string {
 
 export const runMerger = async (api: IExtensionApi, profile: IProfile): Promise<void> => {
     const state = api.getState();
-    const tool = getSicarioTool(state, profile.gameId);
-    if (tool === undefined || !(await toolExists(tool))) {
-        log('info', 'PSM not configured');
-        return Promise.reject(new util.SetupError('PSM not installed or configured!'));
-    }
+    // const tool = getSicarioTool(state, profile.gameId);
     const gamePath = getGamePath(selectors.gameById(state, profile.gameId), state, true);
     const installPath = selectors.installPathForGame(state, profile.gameId);
+    // let toolExePath;
+    let toolExePath = await getMergerPath(state, profile.gameId);
+    if (toolExePath === undefined || !nfs.existsSync(toolExePath)) {
+        //now this existsSync shouldn't be needed since getMergerPath does it too, but let's be safe
+        return Promise.reject(new util.SetupError('PSM not installed or configured!'));
+    }
     const modId = await ensureMergeDataMod(api, profile);
     const modPath = path.join(installPath, modId)
     const args = ['build', `--non-interactive`, `--installPath="${gamePath}"`, `--outputPath="${modPath}"`, `--report="mergeReport.json"`];
-    await api.runExecutable(tool.path, args, { suggestDeploy: false, expectSuccess: true });
+    await api.runExecutable(toolExePath, args, { suggestDeploy: false, expectSuccess: true });
 }
 
 async function ensureMergeDataMod(api: IExtensionApi, profile: IProfile): Promise<string> {

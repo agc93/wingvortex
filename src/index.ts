@@ -160,7 +160,8 @@ function main(context: IExtensionContext) {
         serializeLoadOrder: lo.serialize,
         gameId: GAME_ID,
         validate: lo.validate,
-        toggleableEntries: false
+        toggleableEntries: false,
+        usageInstructions: "Drag and drop your mods around to change the order in which the game loads your mods. Note that, in general, lowest mod 'wins' file conflicts."
     });
     /* context.registerInstaller(
         'pw-pakmods',

@@ -1,4 +1,47 @@
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>WingVortex – Releases</title><link>/blog/releases/</link><description>Recent content in Releases on WingVortex</description><generator>Hugo -- gohugo.io</generator><atom:link href="/blog/releases/index.xml" rel="self" type="application/rss+xml"/><item><title>Blog: Alpha 2.1 Release</title><link>/blog/2021/07/19/alpha-2.1-release/</link><pubDate>Mon, 19 Jul 2021 00:00:00 +0000</pubDate><guid>/blog/2021/07/19/alpha-2.1-release/</guid><description>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>WingVortex – Releases</title><link>/blog/releases/</link><description>Recent content in Releases on WingVortex</description><generator>Hugo -- gohugo.io</generator><atom:link href="/blog/releases/index.xml" rel="self" type="application/rss+xml"/><item><title>Blog: Alpha 2.3 Release</title><link>/blog/2021/07/22/alpha-2.3-release/</link><pubDate>Thu, 22 Jul 2021 00:00:00 +0000</pubDate><guid>/blog/2021/07/22/alpha-2.3-release/</guid><description>
+&lt;div class="pageinfo pageinfo-primary">
+&lt;p>This release is now available &lt;a href="https://www.nexusmods.com/site/mods/189?tab=files">on Nexus Mods&lt;/a>.&lt;/p>
+&lt;/div>
+&lt;p>This release is the next alpha of the Project Wingman extension!&lt;/p>
+&lt;p>This one&amp;rsquo;s another minor update, mainly laying the groundwork for the upcoming Xbox Game Pass/Microsoft Store version of Project Wingman.&lt;/p>
+&lt;p>Note that due to a &lt;a href="https://github.com/Nexus-Mods/Vortex/issues/9665">sort-of bug in Vortex&lt;/a> this version of WingVortex will only be available to users of Vortex 1.4.15 which (as of time of writing) is not actually released. Once the Vortex update is available the extension should auto-update. The previous 0.2.2 release will continue to be available for 1.4 users until the 1.4.15 update.&lt;/p>
+&lt;h2 id="wingvortex-and-the-microsoft-store">WingVortex and the Microsoft Store&lt;/h2>
+&lt;p>Vortex (after the 1.4.15 update) &lt;em>should&lt;/em> support installing and deploying mods for the Microsoft Store version of Project Wingman, but this is &lt;strong>unsupported&lt;/strong>. That means I&amp;rsquo;ll try my best to keep it working, but I provide no guarantees, and I generally can&amp;rsquo;t help you with debugging problems with the Microsoft Store version.&lt;/p>
+&lt;p>My recommendation for this game is simple: if you like Project Wingman and want to be able to mod your game without limits or hacks &lt;strong>buy it on Steam or GOG&lt;/strong>.&lt;/p>
+&lt;h2 id="changes">Changes&lt;/h2>
+&lt;ul>
+&lt;li>Added experimental support for XGP/Microsoft Store installs
+&lt;ul>
+&lt;li>The existing setup process would fail for Microsoft Store installs due to missing permissions.&lt;/li>
+&lt;li>This &lt;em>should&lt;/em> now be resolved and Vortex will work, admittedly only partially, using AppData to deploy mods&lt;/li>
+&lt;li>Modding tools (including PSM and the PSM integration) will &lt;strong>not&lt;/strong> work with the XGP/MSS version.&lt;/li>
+&lt;li>Managing your load order in Vortex will &lt;strong>not&lt;/strong> work with the XGP/MSS version.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>This version is still working off the major changes from v0.2.1 so please &lt;a href="https://github.com/agc93/wingvortex/issues">report any bugs&lt;/a> or &lt;a href="https://www.nexusmods.com/site/mods/189?tab=posts">give feedback&lt;/a>.&lt;/li>
+&lt;/ul></description></item><item><title>Blog: Alpha 2.2 Release</title><link>/blog/2021/07/21/alpha-2.2-release/</link><pubDate>Wed, 21 Jul 2021 00:00:00 +0000</pubDate><guid>/blog/2021/07/21/alpha-2.2-release/</guid><description>
+&lt;div class="pageinfo pageinfo-primary">
+&lt;p>This release is now available &lt;a href="https://www.nexusmods.com/site/mods/189?tab=files">on Nexus Mods&lt;/a>.&lt;/p>
+&lt;/div>
+&lt;p>This release is the next alpha of the Project Wingman extension!&lt;/p>
+&lt;p>This one&amp;rsquo;s a minor fix update, building on the new PSM integration introduced in the &lt;a href="../../updates/v0.2.1">previous update&lt;/a>. Note that since we&amp;rsquo;re using some of Vortex&amp;rsquo;s newer bells and whistles now, this version will require Vortex &lt;strong>1.4&lt;/strong> or higher. The previous 0.0.5 release will continue to be available for 1.3 users.&lt;/p>
+&lt;ul>
+&lt;li>&lt;a href="https://www.nexusmods.com/projectwingman/mods/270">Project Sicario Merger&lt;/a> integration should be more reliable
+&lt;ul>
+&lt;li>The PSM integration introduced in the last update could sometimes fail to detect PSM even if it was installed&lt;/li>
+&lt;li>We&amp;rsquo;re now a lot more forgiving about detecting PSM and will find it more reliably&lt;/li>
+&lt;li>If you&amp;rsquo;re still hitting issues with Vortex failing to find PSM, please let me know!&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>Fixed a few other smaller bugs and problems
+&lt;ul>
+&lt;li>There were a few errors that weren&amp;rsquo;t being handled properly, but these should be improved.&lt;/li>
+&lt;li>The load order window now has (a tiny bit) extra detail&lt;/li>
+&lt;li>This version is still working off the major changes from v0.2.1 so please &lt;a href="https://github.com/agc93/wingvortex/issues">report any bugs&lt;/a> or &lt;a href="https://www.nexusmods.com/site/mods/189?tab=posts">give feedback&lt;/a>.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;p>&lt;img src="https://i.imgur.com/AWyb7vX.gif" alt="PSM integration">&lt;/p></description></item><item><title>Blog: Alpha 2.1 Release</title><link>/blog/2021/07/19/alpha-2.1-release/</link><pubDate>Mon, 19 Jul 2021 00:00:00 +0000</pubDate><guid>/blog/2021/07/19/alpha-2.1-release/</guid><description>
 &lt;div class="pageinfo pageinfo-primary">
 &lt;p>This release is now available &lt;a href="https://www.nexusmods.com/site/mods/189?tab=files">on Nexus Mods&lt;/a>.&lt;/p>
 &lt;/div>

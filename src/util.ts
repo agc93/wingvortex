@@ -1,10 +1,9 @@
 import { IExtensionApi, IInstruction, IProfile } from "vortex-api/lib/types/api";
-import { util } from "vortex-api";
+import {fs, util} from "vortex-api";
 import { GAME_ID, MOD_FILE_EXT } from ".";
 
 import path = require('path');
 import { remote } from 'electron';
-import * as nfs from 'fs';
 
 export const groupBy = function<T> (arr: T[], criteria: string|((obj:T) => string)): {[key: string]: T[]} {
 	return arr.reduce(function (obj, item) {
@@ -81,11 +80,20 @@ export function toEventPromise<ResT>(func: (cb) => void): Promise<ResT> {
 	return new Promise((resolve, reject) => {
 		const cb = (out: ResT) => {
 			if ((out !== null) && (out !== undefined)) {
-			  return resolve(out);
+				return resolve(out);
 			} else {
-			  return reject(out);
+				return reject(out);
 			}
-		  };
-		  func(cb);
+		};
+		func(cb);
 	})
-  }
+}
+
+export function dirAvailable(path: string): boolean {
+	try {
+		const pathStat = fs.statSync(path);
+		return pathStat !== undefined && pathStat.isDirectory();
+	} catch {
+		return false;
+	}
+}

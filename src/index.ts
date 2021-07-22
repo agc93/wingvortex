@@ -1,44 +1,50 @@
 import {fs, log, selectors, util} from "vortex-api";
 import {
     IDiscoveryResult,
-    IExtensionApi,
     IExtensionContext,
     IGameStoreEntry,
     IMod,
     IState,
 } from 'vortex-api/lib/types/api';
 
-import {IIntegrationProps, isGameManaged, isToolMod, UserPaths} from "./util";
+import {dirAvailable, IIntegrationProps, isGameManaged, isToolMod, UserPaths} from "./util";
 import { Features, GeneralSettings, settingsReducer } from "./settings";
 import { getInstaller } from "./install";
 import { installedFilesRenderer, skinsAttribute } from "./attributes";
 import { checkForConflicts, refreshSkins, updateSlots } from "./slots";
 import { update010, migrate010, update020, getUpdateInfo, notesMigration } from "./migrations";
-import {getMergePath, isSicarioMerge, sicarioDeploymentHandler, SicarioSettings, toggleIntegration, sicarioIntegrationTest, PSMTool, runSicarioMerge} from "./sicario";
+import {getMergePath, isSicarioMerge, SicarioSettings, toggleIntegration, sicarioIntegrationTest, PSMTool, runSicarioMerge} from "./sicario";
 
-import {getGamePath, isActiveGame, UnrealGameHelper} from "vortex-ext-common";
+import {getGamePath, isActiveGame} from "vortex-ext-common";
 import { EventHandler } from "vortex-ext-common/events";
 import { migrationHandler } from "vortex-ext-common/migrations";
 import { LoadOrderHelper } from "vortex-ext-common/ueLoadOrder";
 import * as path from 'path';
+import {remote} from "electron";
 
 
 export const GAME_ID = 'projectwingman'
 export const I18N_NAMESPACE = 'wingvortex';
 export const STEAMAPP_ID = 895870;
-export const GOGAPP_ID = 1430183808;
+export const GOGAPP_ID = 1609812781;
+export const MSAPP_ID = "HumbleBundle.ProjectWingman" //this is a complete fucking guess
 export const MOD_FILE_EXT = ".pak";
-export const unreal: UnrealGameHelper = new UnrealGameHelper(GAME_ID);
+// export const unreal: UnrealGameHelper = new UnrealGameHelper(GAME_ID);
 
 export type ModList = { [modId: string]: IMod; };
 
-export const relModPath = path.join('ProjectWingman', 'Content', 'Paks', '~mods');
+export const getModPath = (gamePath: string): string => {
+    if (!dirAvailable(gamePath) || gamePath.includes("WindowsApps" + path.sep)) {
+        return path.join(remote.app.getPath('home'), 'AppData', 'Local', 'ProjectWingman', 'Saved', 'Paks');
+    }
+    return path.join('ProjectWingman', 'Content', 'Paks', '~mods');
+}
 
 export type RunningTools = {[key: string]: {exePath: string, started: any, pid: number, exclusive: boolean}};
 
 
 export function findGame() {
-    return util.GameStoreHelper.findByAppId([STEAMAPP_ID.toString(), GOGAPP_ID.toString()])
+    return util.GameStoreHelper.findByAppId([STEAMAPP_ID.toString(), GOGAPP_ID.toString(), MSAPP_ID])
         .then((game: IGameStoreEntry) => game.gamePath);
 }
 
@@ -69,16 +75,16 @@ function main(context: IExtensionContext) {
         (t, props: IIntegrationProps) => (props.enabled ? t('Yes') : t('No')),
         undefined);
     context.registerReducer(['settings', 'wingvortex'], settingsReducer);
-    var evt = new EventHandler(context.api, GAME_ID);
-    var installer = getInstaller();
-    var lo = new LoadOrderHelper(context.api, GAME_ID);
+    const evt = new EventHandler(context.api, GAME_ID);
+    const installer = getInstaller();
+    const lo = new LoadOrderHelper(context.api, GAME_ID);
     lo.withFilter((val, mod) => {
         return mod ? mod.type == '' : false; //only include default mod types
     });
     context.once(() => {
         log('debug', 'initialising your new extension!');
         try {
-            var langContent = fs.readFileSync(path.join(__dirname, 'language.json'), {encoding: 'utf-8'});
+            let langContent = fs.readFileSync(path.join(__dirname, 'language.json'), {encoding: 'utf-8'});
             context.api.getI18n().addResources('en', I18N_NAMESPACE, JSON.parse(langContent));
             // using require here instead of `fs` means that webpack will bundle the language file for us
             // unfortunately this doesn't seem to actually work for some reason.
@@ -93,7 +99,7 @@ function main(context: IExtensionContext) {
             evt.onGameModsChanged(async (current, changes) => {
                 log('debug', 'invoking evt handler');
                 // debugger;
-                updateSlots(context.api, changes.addedMods, false);
+                await updateSlots(context.api, changes.addedMods, false);
             }));
         installer.configure(context.api);
     });
@@ -108,10 +114,29 @@ function main(context: IExtensionContext) {
         ],
         id: GAME_ID,
         queryPath: findGame,
-        queryModPath: () => relModPath,
-        setup: (discovery: IDiscoveryResult) => {
-            log('debug', 'running wingvortex setup')
-            unreal.prepareforModding(discovery, relModPath)
+        queryModPath: getModPath,
+        setup: async (discovery: IDiscoveryResult): Promise<void> => {
+            log('debug', 'running wingvortex setup');
+            try {
+                await fs.ensureDirWritableAsync(path.join(discovery.path, path.join('ProjectWingman', 'Content', 'Paks', '~mods')));
+            } catch (err) {
+                log('error', `Error while setting up PW`, {err})
+                context.api.sendNotification({
+                    type: 'warning',
+                    title: 'Game directory not writeable',
+                    message: 'The game directory appears to be read-only. Not all features will be available.',
+                    actions: [
+                        {title: 'More',
+                            action: dismiss => {
+                                context.api.showDialog('error', 'Read-only game directory!', {
+                                    text: getRODialogText()
+                                }, [
+                                    {label: "Close", action: () => dismiss()}
+                                ]);
+                            }}
+                    ]
+                });
+            }
         },
         requiresLauncher: getLauncher,
         environment: {
@@ -121,6 +146,9 @@ function main(context: IExtensionContext) {
             steamAppId: STEAMAPP_ID,
             settingsPath: () => UserPaths.userConfigPath(),
             appDataPath: () => UserPaths.userDataPath()
+        },
+        compatible: {
+            deployToGameDirectory: false
         },
         onStart: 'hide'
     });
@@ -145,7 +173,11 @@ function main(context: IExtensionContext) {
         (inst) => isToolMod(inst),
         {
             name: "PW Modding Tool",
-            mergeMods: true
+            mergeMods: true,
+            //this actually should be deployment essential, for everything except XGP
+            //if we made it essential, XGP would completely fail
+            //this way Steam/GOG *should* still work but XGP will be a non-fatal warning
+            deploymentEssential: false
         }
     );
     context.registerTest('sicario-integration', 'gamemode-activated', () => sicarioIntegrationTest(context.api)());
@@ -196,6 +228,12 @@ function main(context: IExtensionContext) {
 
 async function getLauncher(gamePath: string): Promise<{ launcher: string, addInfo?: any }> {
     return gamePath.includes('steamapps') ? {launcher: 'steam'} : undefined;
+}
+
+function getRODialogText(): string {
+    return "Your Project Wingman game directory appears to be read-only. Most likely this means you have installed the game from the Microsoft Store.\n\n" +
+        "Note that WingVortex will still try its best to manage mods using your user directory, but this is largely unsupported.\n\n" +
+        "You should also be aware that some mods and most tools won't work with the Game Pass/Microsoft Store version of the game at all."
 }
 
 module.exports = {

@@ -3,7 +3,7 @@ ModId: 189
 FileName: Project Wingman Support for Vortex
 PreviousFile: auto
 FileDescription: |-
-  Requires Vortex ^ 1.4.0
+  Requires Vortex ^ 1.4.15
 
   Download and install using the Extensions pane in Vortex.
 

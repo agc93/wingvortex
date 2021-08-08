@@ -1,5 +1,5 @@
 import { IExtensionApi, IDialogResult, IProfile, IMod } from "vortex-api/lib/types/api";
-import { util, log, selectors } from "vortex-api";
+import { util, log, selectors, fs } from "vortex-api";
 import * as semver from "semver";
 import { GAME_ID, I18N_NAMESPACE } from ".";
 import { app, remote } from 'electron';
@@ -105,5 +105,9 @@ const releaseNotes = {
     '0.2.1': "WingVortex 0.2.1 includes a major new feature you might want to know about:\n\n" +
         "- Automatic integration with the new Project Sicario Merger (PSM)\n" +
         "- Install PSM with Vortex then enable the integration in Settings > Interface and Vortex will take care of merging your mods for you\n\n" +
-        "This is extremely new functionality so please report any issues you find with the PSM integration"
+        "This is extremely new functionality so please report any issues you find with the PSM integration",
+    '0.2.4': "WingVortex 0.2.4 is a minor bugfix update:\n\n" +
+        "- Improves consistency and reliability of the load order\n" +
+        "- Due to an earlier bug, your load order could need to be reset after this update\n\n" +
+        "The upgrade should be relatively seamless, but you may want to check your load order to confirm that it looks right.",
 }

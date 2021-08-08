@@ -9,6 +9,8 @@ import nfs = require('fs');
 
 type SlotList = {[key: string]: IMod[]};
 
+const conflictWarningMessage = "It looks like more than one of the mods that was just deployed are modifying the same skin slot! The mods and slots in question are shown below.\n\nIf the mod came with multiple options for skin slots, you can try reinstalling and installing only some of the mod files.\n\nIf this is intentional, just make sure the order in your Load Order tab is correct!";
+
 export function checkForConflicts(api: IExtensionApi, files: IDeployedFile[], conflictAction?: (slots: SlotList) => any) {
     log('debug', 'checking for PW skin conflicts');
     var mods = util.getSafe<ModList>(api.getState().persistent, ['mods', GAME_ID], {});
@@ -23,7 +25,7 @@ export function checkForConflicts(api: IExtensionApi, files: IDeployedFile[], co
             conflictAction(conflicts);
         } else {
             api.sendNotification({
-                'type': 'warning',
+                type: 'info',
                 title: 'Potential skin slot conflict!',
                 message: 'It looks like more than one mod is changing the same skin slot.',
                 actions: [
@@ -31,7 +33,7 @@ export function checkForConflicts(api: IExtensionApi, files: IDeployedFile[], co
                         title: 'See More',
                         action: (dismiss) => {
                             api.showDialog('error', 'Potential skin slot conflict!', {
-                                text: "It looks like more than one of the mods that was just deployed are modifying the same skin slot! This can lead to unexpected results and is probably not what you're looking for. The mods and slots in question are shown below.\n\nIf the mod came with multiple options for skin slots, you can try reinstalling and installing only some of the mod files.",
+                                text: conflictWarningMessage,
                                 options: {
                                     wrap: false
                                 },

@@ -223,6 +223,7 @@ function main(context: IExtensionContext) {
     context.registerMigration(migrationHandler(context.api, GAME_ID, update010, migrate010));
     context.registerMigration(migrationHandler(context.api, GAME_ID, update020, notesMigration));
     context.registerMigration(migrationHandler(context.api, GAME_ID, getUpdateInfo('0.2.1'), notesMigration));
+    context.registerMigration(migrationHandler(context.api, GAME_ID, getUpdateInfo('0.2.4'), notesMigration));
     return true;
 }
 

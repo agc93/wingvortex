@@ -1,7 +1,7 @@
 import { IExtensionApi, IInstruction } from "vortex-api/lib/types/api";
 import path = require("path");
 import { log, util } from "vortex-api";
-import { GAME_ID, MOD_FILE_EXT, unreal } from ".";
+import { GAME_ID, MOD_FILE_EXT } from ".";
 import { AdvancedInstaller, AdvancedInstallerBuilder, CompatibilityResult, CompatibilityTest, addInstalledPaksAttribute } from "vortex-ext-common/install/advanced";
 import { Features } from "./settings";
 

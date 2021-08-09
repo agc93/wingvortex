@@ -1,4 +1,20 @@
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>WingVortex – Updates</title><link>/blog/</link><description>Recent content in Updates on WingVortex</description><generator>Hugo -- gohugo.io</generator><atom:link href="/blog/index.xml" rel="self" type="application/rss+xml"/><item><title>Blog: Alpha 2.3 Release</title><link>/blog/2021/07/22/alpha-2.3-release/</link><pubDate>Thu, 22 Jul 2021 00:00:00 +0000</pubDate><guid>/blog/2021/07/22/alpha-2.3-release/</guid><description>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>WingVortex – Updates</title><link>/blog/</link><description>Recent content in Updates on WingVortex</description><generator>Hugo -- gohugo.io</generator><atom:link href="/blog/index.xml" rel="self" type="application/rss+xml"/><item><title>Blog: Alpha 2.4 Release</title><link>/blog/2021/08/09/alpha-2.4-release/</link><pubDate>Mon, 09 Aug 2021 00:00:00 +0000</pubDate><guid>/blog/2021/08/09/alpha-2.4-release/</guid><description>
+&lt;div class="pageinfo pageinfo-primary">
+&lt;p>This release is now available &lt;a href="https://www.nexusmods.com/site/mods/189?tab=files">on Nexus Mods&lt;/a>.&lt;/p>
+&lt;/div>
+&lt;p>This release is the next alpha of the Project Wingman extension!&lt;/p>
+&lt;p>This one&amp;rsquo;s another minor update, mainly better handling a few small bugs in the load order support. It was possible in the last version to write an invalid load order file and Vortex would then be &amp;ldquo;stuck&amp;rdquo; with that load order. While I&amp;rsquo;m still working on the cause of the bug itself, this update will at least allow you to recover from it more easily.&lt;/p>
+&lt;h2 id="changes">Changes&lt;/h2>
+&lt;ul>
+&lt;li>Added invalid load order recovery
+&lt;ul>
+&lt;li>This will prompt you if Vortex tries to load an invalid load order file and offer to reset it&lt;/li>
+&lt;li>This will reset your current load order!&lt;/li>
+&lt;li>If you&amp;rsquo;re feeling helpful, send me the load order file &lt;em>before&lt;/em> you reset it to help find the culprit.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>This version is still working off the major changes from v0.2.1 so please &lt;a href="https://github.com/agc93/wingvortex/issues">report any bugs&lt;/a> or &lt;a href="https://www.nexusmods.com/site/mods/189?tab=posts">give feedback&lt;/a>.&lt;/li>
+&lt;/ul></description></item><item><title>Blog: Alpha 2.3 Release</title><link>/blog/2021/07/22/alpha-2.3-release/</link><pubDate>Thu, 22 Jul 2021 00:00:00 +0000</pubDate><guid>/blog/2021/07/22/alpha-2.3-release/</guid><description>
 &lt;div class="pageinfo pageinfo-primary">
 &lt;p>This release is now available &lt;a href="https://www.nexusmods.com/site/mods/189?tab=files">on Nexus Mods&lt;/a>.&lt;/p>
 &lt;/div>

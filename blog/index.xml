@@ -1,4 +1,19 @@
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>WingVortex – Updates</title><link>/blog/</link><description>Recent content in Updates on WingVortex</description><generator>Hugo -- gohugo.io</generator><atom:link href="/blog/index.xml" rel="self" type="application/rss+xml"/><item><title>Blog: Alpha 2.4 Release</title><link>/blog/2021/08/09/alpha-2.4-release/</link><pubDate>Mon, 09 Aug 2021 00:00:00 +0000</pubDate><guid>/blog/2021/08/09/alpha-2.4-release/</guid><description>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>WingVortex – Updates</title><link>/blog/</link><description>Recent content in Updates on WingVortex</description><generator>Hugo -- gohugo.io</generator><atom:link href="/blog/index.xml" rel="self" type="application/rss+xml"/><item><title>Blog: Alpha 2.5 Release</title><link>/blog/2021/09/05/alpha-2.5-release/</link><pubDate>Sun, 05 Sep 2021 00:00:00 +0000</pubDate><guid>/blog/2021/09/05/alpha-2.5-release/</guid><description>
+&lt;div class="pageinfo pageinfo-primary">
+&lt;p>This release is now available &lt;a href="https://www.nexusmods.com/site/mods/189?tab=files">on Nexus Mods&lt;/a>.&lt;/p>
+&lt;/div>
+&lt;p>This release is the next alpha of the Project Wingman extension!&lt;/p>
+&lt;p>This one&amp;rsquo;s another minor update, adding support for detecting embedded Project Sicario presets/requests. This will mostly make it clearer which data table conflicts can be resolved with Project Sicario and which ones are not compatible.&lt;/p>
+&lt;h2 id="changes">Changes&lt;/h2>
+&lt;ul>
+&lt;li>Added detection for embedded Sicario presets and request files
+&lt;ul>
+&lt;li>This will detect any Sicario presets or request files embedded in mods you install, just like skins.&lt;/li>
+&lt;li>This also means that the dialog shown when there is a data table conflict will now show mods that include Sicario patches&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>This version is still working off the major changes from v0.2.1 so please &lt;a href="https://github.com/agc93/wingvortex/issues">report any bugs&lt;/a> or &lt;a href="https://www.nexusmods.com/site/mods/189?tab=posts">give feedback&lt;/a>.&lt;/li>
+&lt;/ul></description></item><item><title>Blog: Alpha 2.4 Release</title><link>/blog/2021/08/09/alpha-2.4-release/</link><pubDate>Mon, 09 Aug 2021 00:00:00 +0000</pubDate><guid>/blog/2021/08/09/alpha-2.4-release/</guid><description>
 &lt;div class="pageinfo pageinfo-primary">
 &lt;p>This release is now available &lt;a href="https://www.nexusmods.com/site/mods/189?tab=files">on Nexus Mods&lt;/a>.&lt;/p>
 &lt;/div>

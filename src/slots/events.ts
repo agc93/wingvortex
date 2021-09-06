@@ -3,7 +3,7 @@ import { util, selectors, fs, actions, log } from "vortex-api";
 import { GAME_ID, ModList, MOD_FILE_EXT } from "..";
 import { NativeSlotReader } from "./pakReader";
 import { QuickSlotReader } from "./bmsReader";
-import { ModBlueprints, AircraftSlot } from "./types";
+import { ModBlueprints, AircraftSlot, SicarioRecords } from "./types";
 import path = require("path");
 import nfs = require('fs');
 
@@ -61,7 +61,7 @@ export function checkForConflicts(api: IExtensionApi, files: IDeployedFile[], co
                     title: 'See More',
                     action: (dismiss) => {
                         api.showDialog('error', 'Potential blueprint mod conflict!', {
-                            text: "It looks like more than one of the mods that was just deployed are modifying the same data table! These mods can't be loaded together as they will overwrite each other, leading to unexpected results. The mods in question and what blueprint they modify are shown below.\n\nYou should either use a merged mod or disable all but one of the conflicting mods before you launch the game.",
+                            text: "It looks like more than one of the mods that was just deployed are modifying the same data table! These mods can't be loaded together as they will overwrite each other, leading to unexpected results. The mods in question and what blueprint they modify are shown below.\n\nYou should either merge these mods using Project Sicario or disable all but one of the conflicting mods before you launch the game. Sicario-compatible mods are indicated as such in the list below.",
                             options: {
                                 wrap: false
                             },
@@ -77,11 +77,27 @@ export function checkForConflicts(api: IExtensionApi, files: IDeployedFile[], co
 }
 
 function renderConflictList(conflicts: SlotList, prefix: string = 'Slot'): string {
+    function modName(m: IMod): string {
+        var name = util.getSafe(m.attributes, ['modName'], m.id);
+        var sicario = util.getSafe<SicarioRecords>(m.attributes, ['sicario'], undefined);
+        if (sicario !== undefined) {
+            var sicarioStatus: string[] = [];
+            if (sicario.presetFile !== undefined) {
+                sicarioStatus.push("Includes Sicario Preset");
+            }
+            if (sicario.requestFile !== undefined) {
+                sicarioStatus.push("Built with Sicario");
+            }
+            var sicarioText = sicarioStatus.length > 0 ? ` (${sicarioStatus.join('/')})` : '';
+            name = `${name}${sicarioText}`;
+        }
+        return name;
+    }
     return Object.keys(conflicts)
         .map(ck => {
-            return `${prefix} ${ck.replace('|', '/')}: ${conflicts[ck].map(m => util.getSafe(m.attributes, ['modName'], m.id)).join(', ')}`
+            return `${prefix} ${ck.replace('|', '/')}:\n      ${conflicts[ck].map(m => modName(m)).join(', ')}`
         })
-        .join('\n');
+        .join('\n\n');
 }
 
 function buildConflictList(mods: IMod[], attributeName: string): SlotList {
@@ -170,6 +186,9 @@ export async function updateSlots(api: IExtensionApi, mods: IMod[], replace: boo
                 api.store.dispatch(actions.setModAttribute(GAME_ID, mod.id, 'datatables', tables));
             } else if (!tables && replace) {
                 api.store.dispatch(actions.setModAttribute(GAME_ID, mod.id, 'datatables', []));
+            }
+            if (result.sicario !== undefined && (!!result?.sicario?.presetFile || !!result?.sicario?.requestFile)) {
+                api.store.dispatch(actions.setModAttribute(GAME_ID, mod.id, 'sicario', result.sicario));
             }
         }
     }

@@ -10,6 +10,7 @@ export class NativeSlotReader {
     private _api: IExtensionApi;
     private _blueprintsPath: string = 'Content/ProjectWingman/Blueprints/';
     private _assetsPath: string = 'Assets/Objects/Aircraft/'
+    private _sicarioPath: string = 'sicario/'
     private _overrides: ((match: AircraftSlot) => boolean)[]
     /**
      *
@@ -94,6 +95,17 @@ export class NativeSlotReader {
                 for (const file of blueprints) {
                     var tableName = path.basename(file.fileName, path.extname(file.fileName));
                     tables.push(tableName);
+                }
+                var sicarioFiles = result.filter(f => !!f && f?.fileName).filter(f => f.fileName.indexOf(this._sicarioPath) !== -1);
+                if (sicarioFiles && sicarioFiles.length > 0) {
+                    record.sicario = {};
+                }
+                for (const sicarioFile of sicarioFiles) {
+                    if (path.extname(sicarioFile.fileName) === ".dtp" && !record.sicario.presetFile) {
+                        record.sicario.presetFile = sicarioFile.fileName;
+                    } else if (path.extname(sicarioFile.fileName) === '.json' && !record.sicario.requestFile) {
+                        record.sicario.requestFile = sicarioFile.fileName;
+                    }
                 }
             } else {
                 this._api.sendNotification({
